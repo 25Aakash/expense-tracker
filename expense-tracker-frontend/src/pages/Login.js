@@ -1,7 +1,7 @@
-// src/pages/Login.js
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import API from '../services/api';
+import { toast } from 'react-toastify';
 
 function Login() {
   const [form, setForm] = useState({ identifier: '', password: '' });
@@ -11,40 +11,55 @@ function Login() {
     e.preventDefault();
     try {
       const res = await API.post('/auth/login', form);
-      localStorage.setItem('token', res.data.token);
-      navigate('/');
+      const token = res.data.token;
+      localStorage.setItem('token', token);
+      
+      // ✅ Decode JWT (without library)
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const isAdmin = payload.isAdmin;
+      localStorage.setItem('isAdmin', isAdmin);
+
+      toast.success("Login successful");
+      
+      if (isAdmin) {
+        navigate('/admin');
+      } else {
+        navigate('/');
+      }
     } catch (err) {
-      alert(err.response?.data?.error || 'Login failed');
+      toast.error("Invalid credentials");
     }
   };
 
   return (
-    <div className="container d-flex vh-100 justify-content-center align-items-center">
-      <form onSubmit={handleSubmit} className="border p-4 rounded shadow bg-white w-100" style={{ maxWidth: '400px' }}>
-        <h2 className="mb-4 text-center">Login</h2>
-        <div className="mb-3">
-          <input
-            type="text"
-            className="form-control"
-            placeholder="Email or Mobile"
-            required
-            onChange={(e) => setForm({ ...form, identifier: e.target.value })}
-          />
-        </div>
-        <div className="mb-3">
-          <input
-            type="password"
-            className="form-control"
-            placeholder="Password"
-            required
-            onChange={(e) => setForm({ ...form, password: e.target.value })}
-          />
-        </div>
-        <button type="submit" className="btn btn-primary w-100">Login</button>
-        <p className="text-center mt-3">
+    <div className="container d-flex justify-content-center align-items-center vh-100">
+      <div className="card shadow-sm p-4" style={{ maxWidth: '400px', width: '100%' }}>
+        <h3 className="text-center mb-4 text-primary fw-bold">Login</h3>
+        <form onSubmit={handleSubmit}>
+          <div className="mb-3">
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Email or Mobile"
+              required
+              onChange={(e) => setForm({ ...form, identifier: e.target.value })}
+            />
+          </div>
+          <div className="mb-3">
+            <input
+              type="password"
+              className="form-control"
+              placeholder="Password"
+              required
+              onChange={(e) => setForm({ ...form, password: e.target.value })}
+            />
+          </div>
+          <button className="btn btn-primary w-100 rounded-pill">Login</button>
+        </form>
+        <p className="text-center mt-3 small">
           Don't have an account? <a href="/register">Register</a>
         </p>
-      </form>
+      </div>
     </div>
   );
 }

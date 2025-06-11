@@ -1,26 +1,41 @@
-// src/components/ExpenseList.js
 import React from 'react';
 
-function ExpenseList({ expenses }) {
+function ExpenseList({ expenses, filters, setFilters }) {
   return (
-    <div>
-      <h5 className="mb-3">Recent Expenses</h5>
-      {expenses.length === 0 ? (
-        <p className="text-muted">No expenses found.</p>
-      ) : (
-        <ul className="list-group">
-          {expenses.map((exp) => (
-            <li key={exp._id} className="list-group-item d-flex justify-content-between align-items-center">
-              <div>
-                <strong>{exp.title}</strong> <br />
-                <small className="text-muted">{new Date(exp.date).toLocaleDateString()} | {exp.category}</small><br />
-                <small className="text-muted">{exp.note}</small>
-              </div>
-              <span className="badge bg-success fs-6">₹{exp.amount}</span>
-            </li>
-          ))}
-        </ul>
-      )}
+    <div className="card mt-4">
+      <div className="card-header bg-danger text-white">
+        <h5 className="mb-0">Recent Expenses</h5>
+      </div>
+
+      <div className="card-body">
+        {/* Table */}
+        {expenses.length === 0 ? (
+          <p>No expenses found.</p>
+        ) : (
+          <div className="table-responsive">
+            <table className="table table-hover mb-0">
+              <thead className="table-light">
+                <tr>
+                  <th>Date</th>
+                  <th>Amount (₹)</th>
+                  <th>Category</th>
+                  <th>Note</th>
+                </tr>
+              </thead>
+              <tbody>
+                {expenses.map((expense) => (
+                  <tr key={expense._id}>
+                    <td>{new Date(expense.date).toLocaleDateString()}</td>
+                    <td>₹{expense.amount}</td>
+                    <td>{expense.category}</td>
+                    <td>{expense.note || '-'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

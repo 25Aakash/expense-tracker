@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import API from '../services/api';
 import { Modal } from 'bootstrap';
 
-function ExpenseForm({ onAdd }) {
-  const defaultCategories = ['Food', 'Shopping', 'Travel', 'Bills', 'Entertainment', 'Other'];
+function IncomeForm({ onAdd }) {
+  const defaultCategories = ['Salary', 'Business', 'Interest', 'Gifts', 'Other'];
   const [categories, setCategories] = useState(defaultCategories);
 
   const [form, setForm] = useState({
@@ -19,7 +19,7 @@ function ExpenseForm({ onAdd }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await API.post('/expenses/add', form);
+      await API.post('/incomes/add', form);
       onAdd();
       setForm({
         amount: '',
@@ -29,7 +29,7 @@ function ExpenseForm({ onAdd }) {
         date: new Date().toISOString().slice(0, 10),
       });
     } catch (err) {
-      alert('Failed to add expense');
+      alert('Failed to add income');
     }
   };
 
@@ -43,9 +43,9 @@ function ExpenseForm({ onAdd }) {
   };
 
   const handleCategoryChange = (e) => {
-  const selected = e.target.value;
+    const selected = e.target.value;
     if (selected === '__add_new__') {
-      const modalEl = document.getElementById('addExpenseCategoryModal');
+      const modalEl = document.getElementById('addIncomeCategoryModal');
       const modal = new Modal(modalEl);
       modal.show();
     } else {
@@ -112,18 +112,18 @@ function ExpenseForm({ onAdd }) {
           </div>
 
           <div className="col-12 d-grid">
-            <button type="submit" className="btn btn-danger rounded-pill">
-              Add Expense
+            <button type="submit" className="btn btn-success rounded-pill">
+              Add Income
             </button>
           </div>
         </div>
       </form>
 
       {/* Hidden trigger button for modal */}
-      <button type="button" id="addExpenseCategoryModalBtn" data-bs-toggle="modal" data-bs-target="#addExpenseCategoryModal" hidden />
+      <button type="button" id="addIncomeCategoryModalBtn" data-bs-toggle="modal" data-bs-target="#addIncomeCategoryModal" hidden/>
 
       {/* Modal for Adding New Category */}
-      <div className="modal fade" id="addExpenseCategoryModal" tabIndex="-1">
+      <div className="modal fade" id="addIncomeCategoryModal" tabIndex="-1">
         <div className="modal-dialog modal-dialog-centered">
           <div className="modal-content p-3">
             <h5 className="mb-3 fw-bold text-primary">Add New Category</h5>
@@ -145,4 +145,4 @@ function ExpenseForm({ onAdd }) {
   );
 }
 
-export default ExpenseForm;
+export default IncomeForm;
