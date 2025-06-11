@@ -1,14 +1,22 @@
-// src/charts/ExpenseChart.js
 import React from 'react';
-import { Pie } from 'react-chartjs-2';
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import { Bar } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
 
-ChartJS.register(ArcElement, Tooltip, Legend);
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 function ExpenseChart({ expenses }) {
   const categoryTotals = {};
-  expenses.forEach((exp) => {
-    categoryTotals[exp.category] = (categoryTotals[exp.category] || 0) + Number(exp.amount);
+
+  expenses.forEach((expense) => {
+    categoryTotals[expense.category] = (categoryTotals[expense.category] || 0) + expense.amount;
   });
 
   const data = {
@@ -17,31 +25,40 @@ function ExpenseChart({ expenses }) {
       {
         label: 'Expenses by Category',
         data: Object.values(categoryTotals),
-        backgroundColor: [
-          '#0d6efd',
-          '#198754',
-          '#dc3545',
-          '#fd7e14',
-          '#6f42c1',
-          '#20c997',
-          '#0dcaf0',
-          '#ffc107',
-        ],
-        borderColor: '#fff',
-        borderWidth: 2,
+        backgroundColor: 'rgba(255, 99, 132, 0.6)',
+        borderRadius: 6,
       },
     ],
   };
 
+  const options = {
+    responsive: true,
+    plugins: {
+      title: {
+        display: true,
+        text: 'Expenses by Category',
+      },
+      legend: {
+        display: false,
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          callback: function (value) {
+            return `₹${value}`;
+          },
+        },
+      },
+    },
+  };
+
   return (
-    <div>
-      <h5 className="mb-3 text-center">Expenses by Category</h5>
-      <div className="d-flex justify-content-center">
-        <div className="w-100" style={{ maxWidth: 300 }}>
-          <Pie data={data} />
-        </div>
-      </div>
-    </div>
+  <div>
+    <h5 className="mb-3 text-center">Expense Chart</h5>
+  <Bar data={data} options={options} />
+  </div>
   );
 }
 

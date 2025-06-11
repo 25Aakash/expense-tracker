@@ -1,0 +1,47 @@
+/* SaaS Font & Theme */
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: #f9fafb;
+  color: #333;
+}
+
+.card {
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 0 15px rgba(0,0,0,0.05);
+}
+
+.btn {
+  border-radius: 25px;
+  font-weight: 500;
+}
+
+.shadow-sm {
+  box-shadow: 0 0 10px rgba(0,0,0,0.06) !important;
+}
+
+.modal-content {
+  border-radius: 15px;
+}
+
+/* FINAL SaaS Table (No Scroll) */
+.table {
+  table-layout: fixed !important;
+  width: 100% !important;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.table td, .table th {
+  padding: 0.3rem 0.5rem !important;
+  vertical-align: middle !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.9rem !important;
+}
+
+/* Slight proportional column feel */
+.table th:nth-child(1), .table td:nth-child(1) { width: 30%; }
+.table th:nth-child(2), .table td:nth-child(2) { width: 30%; }
+.table th:nth-child(3), .table td:nth-child(3) { width: 19%; }
+.table th:nth-child(4), .table td:nth-child(4) { width: 21%; }
