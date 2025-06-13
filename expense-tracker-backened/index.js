@@ -15,6 +15,10 @@ const app = express(); // ✅ Moved above app.use
 app.use(cors());
 app.use(express.json());
 
+app.get('/health', (req, res) => {
+  res.status(200).send('Server is healthy!');
+});
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/expenses', expenseRoutes);
