@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import API from '../services/api';
 import { Modal } from 'bootstrap';
+import { toast } from 'react-toastify';
 
 function ExpenseForm({ onAdd }) {
   const defaultCategories = ['Food', 'Shopping', 'Travel', 'Bills', 'Entertainment', 'Other'];
@@ -28,8 +29,9 @@ function ExpenseForm({ onAdd }) {
         method: 'Bank',
         date: new Date().toISOString().slice(0, 10),
       });
+      toast.success("Expense added successfully");
     } catch (err) {
-      alert('Failed to add expense');
+      toast.error('Failed to add expense');
     }
   };
 
