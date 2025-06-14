@@ -2,10 +2,11 @@ import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { IoChevronBackSharp } from 'react-icons/io5';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import { parseISO, format } from 'date-fns';
 
-function SubNavbar({ incomes, expenses, fromDate, toDate }) {
+function SubNavbar({ incomes = [], expenses = [], fromDate, toDate }) {
+
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -30,7 +31,7 @@ function SubNavbar({ incomes, expenses, fromDate, toDate }) {
     const filteredIncomes = filterByDate(incomes);
     const filteredExpenses = filterByDate(expenses);
 
-    doc.autoTable({
+    autoTable(doc, {
       head: [['Type', 'Amount', 'Category', 'Date']],
       body: [
         ...filteredIncomes.map(i => ['Income', i.amount, i.category, format(parseISO(i.date), 'yyyy-MM-dd')]),
