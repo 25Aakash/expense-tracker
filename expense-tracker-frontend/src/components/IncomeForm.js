@@ -56,14 +56,29 @@ function IncomeForm({ onAdd }) {
     <>
       <form onSubmit={handleSubmit}>
         <div className="row g-3">
+
+          {/* SaaS Payment Method Buttons */}
+          <div className="col-md-12 text-center">
+            <div className="btn-group">
+              <button type="button"
+                className={`btn ${form.method === 'Bank' ? 'btn-primary' : 'btn-outline-primary'}`}
+                onClick={() => setForm({ ...form, method: 'Bank' })}>
+                Bank
+              </button>
+              <button type="button"
+                className={`btn ${form.method === 'Cash' ? 'btn-primary' : 'btn-outline-primary'}`}
+                onClick={() => setForm({ ...form, method: 'Cash' })}>
+                Cash
+              </button>
+            </div>
+          </div>
+
           <div className="col-md-6">
             <input
-              type="number"
+              type="date"
               className="form-control"
-              placeholder="Amount"
-              required
-              value={form.amount}
-              onChange={(e) => setForm({ ...form, amount: e.target.value })}
+              value={form.date}
+              onChange={(e) => setForm({ ...form, date: e.target.value })}
             />
           </div>
 
@@ -82,27 +97,17 @@ function IncomeForm({ onAdd }) {
           </div>
 
           <div className="col-md-6">
-            <select
-              className="form-select"
-              value={form.method}
-              required
-              onChange={(e) => setForm({ ...form, method: e.target.value })}
-            >
-              <option value="Bank">Bank</option>
-              <option value="Cash">Cash</option>
-            </select>
-          </div>
-
-          <div className="col-md-6">
             <input
-              type="date"
+              type="number"
               className="form-control"
-              value={form.date}
-              onChange={(e) => setForm({ ...form, date: e.target.value })}
+              placeholder="Amount"
+              required
+              value={form.amount}
+              onChange={(e) => setForm({ ...form, amount: e.target.value })}
             />
           </div>
 
-          <div className="col-12">
+          <div className="col-md-6">
             <textarea
               className="form-control"
               placeholder="Note (optional)"
