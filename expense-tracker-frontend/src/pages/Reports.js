@@ -8,11 +8,12 @@ function Reports() {
   const [incomes, setIncomes] = useState([]);
   const [filter, setFilter] = useState('All');
   const [fromDate, setFromDate] = useState('');
-  const [toDate, setToDate] = useState('');  
+  const [toDate, setToDate] = useState('');
 
-  // For Date Modal (temporary)
-  const [tempFromDate, setTempFromDate] = useState('');
-  const [tempToDate, setTempToDate] = useState('');
+  // Default to today
+  const today = new Date().toISOString().split('T')[0];
+  const [tempFromDate, setTempFromDate] = useState(today);
+  const [tempToDate, setTempToDate] = useState(today);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -30,13 +31,16 @@ function Reports() {
     return data.filter(entry => {
       const date = parseISO(entry.date);
       let pass = true;
-      if (filter === 'Daily') return isToday(date);
-      if (filter === 'Weekly') return isThisWeek(date, { weekStartsOn: 1 });
-      if (filter === 'Monthly') return isThisMonth(date);
-      if (filter === 'Yearly') return isThisYear(date);
+
+      if (filter === 'Daily') pass = isToday(date);
+      else if (filter === 'Weekly') pass = isThisWeek(date, { weekStartsOn: 1 });
+      else if (filter === 'Monthly') pass = isThisMonth(date);
+      else if (filter === 'Yearly') pass = isThisYear(date);
+
       if (fromDate && toDate) {
         pass = date >= parseISO(fromDate) && date <= parseISO(toDate);
       }
+
       return pass;
     });
   };
@@ -56,23 +60,40 @@ function Reports() {
           <button
             key={option}
             className={`btn rounded-pill ${filter === option ? 'btn-primary' : 'btn-outline-primary'}`}
-            onClick={() => setFilter(option)}
+            onClick={() => {
+              setFilter(option);
+              setFromDate('');
+              setToDate('');
+              setTempFromDate(today);
+              setTempToDate(today);
+            }}
           >
             {option}
           </button>
         ))}
-        {/* ✅ Date Range Button */}
-        <button className="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#dateModal">
+
+        {/* Date Range Picker */}
+        <button
+          className="btn btn-outline-primary"
+          data-bs-toggle="modal"
+          data-bs-target="#dateModal"
+          onClick={() => {
+            setTempFromDate(today);
+            setTempToDate(today);
+          }}
+        >
           📅
-        </button>        
+        </button>
       </div>
 
+      {/* Donut Chart */}
       <div className="d-flex justify-content-center mb-4 flex-wrap">
         <div style={{ maxWidth: '320px', width: '100%' }}>
           <DonutChart totalIncome={totalIncome} totalExpense={totalExpense} />
         </div>
       </div>
 
+      {/* Summary Cards */}
       <div className="row text-center fw-bold mb-4">
         <div className="col-12 col-md-4 mb-3">
           <div className="card bg-light shadow-sm py-3">
@@ -94,7 +115,7 @@ function Reports() {
         </div>
       </div>
 
-      {/* ✅ Date Range Modal */}
+      {/* Date Range Modal */}
       <div className="modal fade" id="dateModal" tabIndex="-1">
         <div className="modal-dialog modal-dialog-centered">
           <div className="modal-content">
@@ -109,12 +130,13 @@ function Reports() {
               <input type="date" className="form-control" value={tempToDate} onChange={e => setTempToDate(e.target.value)} />
             </div>
             <div className="modal-footer">
-              <button 
-                className="btn btn-primary" 
+              <button
+                className="btn btn-primary"
                 data-bs-dismiss="modal"
                 onClick={() => {
-                  setFromDate(tempFromDate);
-                  setToDate(tempToDate);
+                  setFromDate(tempFromDate || today);
+                  setToDate(tempToDate || today);
+                  setFilter('Custom');
                 }}
               >
                 OK
@@ -122,7 +144,8 @@ function Reports() {
             </div>
           </div>
         </div>
-      </div>      
+      </div>
+
     </div>
   );
 }
