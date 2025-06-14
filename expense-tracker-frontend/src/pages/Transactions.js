@@ -13,9 +13,9 @@ function Transactions() {
   const [page, setPage] = useState(1);
   const recordsPerPage = 10;
 
-  // For Date Modal (temporary)
-  const [tempFromDate, setTempFromDate] = useState('');
-  const [tempToDate, setTempToDate] = useState('');
+  const today = new Date().toISOString().split('T')[0];
+  const [tempFromDate, setTempFromDate] = useState(today);
+  const [tempToDate, setTempToDate] = useState(today);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -33,21 +33,27 @@ function Transactions() {
     return data.filter(entry => {
       const date = parseISO(entry.date);
       let pass = true;
+
+      // Time-based filter
       if (filter === 'Daily') pass = isToday(date);
-      if (filter === 'Weekly') pass = isThisWeek(date, { weekStartsOn: 1 });
-      if (filter === 'Monthly') pass = isThisMonth(date);
-      if (filter === 'Yearly') pass = isThisYear(date);
+      else if (filter === 'Weekly') pass = isThisWeek(date, { weekStartsOn: 1 });
+      else if (filter === 'Monthly') pass = isThisMonth(date);
+      else if (filter === 'Yearly') pass = isThisYear(date);
+
+      // Payment method filter
       if (paymentFilter && entry.method !== paymentFilter) return false;
+
+      // Date range filter
       if (fromDate && toDate) {
         pass = date >= parseISO(fromDate) && date <= parseISO(toDate);
       }
+
       return pass;
     });
   };
 
   const filteredIncome = applyFilter(incomes).map(i => ({ ...i, type: 'Income' }));
   const filteredExpense = applyFilter(expenses).map(e => ({ ...e, type: 'Expense' }));
-
   const combined = [...filteredIncome, ...filteredExpense].sort((a, b) => new Date(b.date) - new Date(a.date));
   const totalPages = Math.ceil(combined.length / recordsPerPage);
   const paginated = combined.slice((page - 1) * recordsPerPage, page * recordsPerPage);
@@ -61,14 +67,26 @@ function Transactions() {
           <button
             key={option}
             className={`btn rounded-pill ${filter === option ? 'btn-primary' : 'btn-outline-primary'}`}
-            onClick={() => setFilter(option)}
+            onClick={() => {
+              setFilter(option);
+              setFromDate('');
+              setToDate('');
+              setTempFromDate(today);
+              setTempToDate(today);
+            }}
           >
             {option}
           </button>
         ))}
-
-        {/* ✅ Date Range Button */}
-        <button className="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#dateModal">
+        <button
+          className="btn btn-outline-primary"
+          data-bs-toggle="modal"
+          data-bs-target="#dateModal"
+          onClick={() => {
+            setTempFromDate(today);
+            setTempToDate(today);
+          }}
+        >
           📅
         </button>
       </div>
@@ -129,7 +147,7 @@ function Transactions() {
         <button className="btn btn-outline-primary" disabled={page === totalPages} onClick={() => setPage(page + 1)}>Next</button>
       </div>
 
-      {/* ✅ Date Range Modal */}
+      {/* Date Range Modal */}
       <div className="modal fade" id="dateModal" tabIndex="-1">
         <div className="modal-dialog modal-dialog-centered">
           <div className="modal-content">
@@ -144,12 +162,13 @@ function Transactions() {
               <input type="date" className="form-control" value={tempToDate} onChange={e => setTempToDate(e.target.value)} />
             </div>
             <div className="modal-footer">
-              <button 
-                className="btn btn-primary" 
+              <button
+                className="btn btn-primary"
                 data-bs-dismiss="modal"
                 onClick={() => {
-                  setFromDate(tempFromDate);
-                  setToDate(tempToDate);
+                  setFromDate(tempFromDate || today);
+                  setToDate(tempToDate || today);
+                  setFilter('Custom');
                 }}
               >
                 OK
