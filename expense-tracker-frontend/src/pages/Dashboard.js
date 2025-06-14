@@ -59,11 +59,14 @@ function Dashboard() {
 
   return (
     <div className="container py-4">
-      <h2 className="text-center mb-4 text-primary">Dashboard</h2>
+      {/* Updated heading section */}
+      <div className="mb-3">
+        <h4 className="text-primary text-start">Dashboard</h4>
+      </div>
 
-      {/* Summary Cards */}
-      <div className="row mb-4">
-        <div className="col-12 col-md-4 mb-3">
+      {/* Summary Cards: responsive one-line layout */}
+      <div className="row row-cols-1 row-cols-md-3 g-3 mb-4">
+        <div className="col">
           <div className="card text-center bg-light h-100 shadow-sm">
             <div className="card-body">
               <h6 className="text-success mb-2">Total Income</h6>
@@ -71,8 +74,7 @@ function Dashboard() {
             </div>
           </div>
         </div>
-
-        <div className="col-12 col-md-4 mb-3">
+        <div className="col">
           <div className="card text-center bg-light h-100 shadow-sm">
             <div className="card-body">
               <h6 className="text-danger mb-2">Total Expenses</h6>
@@ -80,8 +82,7 @@ function Dashboard() {
             </div>
           </div>
         </div>
-
-        <div className="col-12 col-md-4 mb-3">
+        <div className="col">
           <div className="card text-center bg-light h-100 shadow-sm">
             <div className="card-body">
               <h6 className="text-primary mb-2">Net Balance</h6>
