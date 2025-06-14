@@ -34,7 +34,7 @@ function Navbar() {
       <nav className="navbar navbar-light bg-white shadow-sm sticky-top px-3 py-2">
         <div className="container-fluid">
           <NavLink className="navbar-brand fw-bold text-primary" to="/">
-            💰 ExpenseTracker
+            💰 DailyBook
           </NavLink>
 
           <button className="btn btn-outline-primary d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileMenu">
@@ -58,7 +58,7 @@ function Navbar() {
       {/* Offcanvas Sidebar */}
       <div className="offcanvas offcanvas-start" tabIndex="-1" id="mobileMenu">
         <div className="offcanvas-header">
-          <h5 className="offcanvas-title text-primary">MyExpenseTracker</h5>
+          <h5 className="offcanvas-title text-primary">DailyBook</h5>
           <button type="button" className="btn-close" data-bs-dismiss="offcanvas"></button>
         </div>
         <div className="offcanvas-body d-flex flex-column gap-3">
