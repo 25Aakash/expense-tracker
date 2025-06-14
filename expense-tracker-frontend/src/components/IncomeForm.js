@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import API from '../services/api';
 import { Modal } from 'bootstrap';
+import { toast } from 'react-toastify';
 
 function IncomeForm({ onAdd }) {
   const defaultCategories = ['Salary', 'Business', 'Interest', 'Gifts', 'Other'];
@@ -28,8 +29,9 @@ function IncomeForm({ onAdd }) {
         method: 'Bank',
         date: new Date().toISOString().slice(0, 10),
       });
+      toast.success("Income added successfully");
     } catch (err) {
-      alert('Failed to add income');
+      toast.error('Failed to add income');
     }
   };
 
