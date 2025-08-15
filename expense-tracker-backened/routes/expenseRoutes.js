@@ -1,30 +1,27 @@
 const express = require('express');
 const router = express.Router();
-const Expense = require('../models/Expense');
-const auth = require('../middleware/auth');
+const Joi       = require('joi');
+const auth      = require('../middleware/auth');
+const validate  = require('../middleware/validate');
+const can       = require('../middleware/checkPermission');
+const {
+  addExpense,
+  getExpenses,
+  updateExpense,
+  deleteExpense,
+} = require('../controllers/expenseController');
 
-// Add new expense
-router.post('/add', auth, async (req, res) => {
-  try {
-    const expense = new Expense({
-      ...req.body,
-      userId: req.user.id  // ✅ tie to user
-    });
-    await expense.save();
-    res.status(201).json(expense);
-  } catch (err) {
-    res.status(400).json({ error: 'Failed to save expense' });
-  }
+const expenseSchema = Joi.object({
+  amount:   Joi.number().positive().required(),
+  category: Joi.string().required(),
+  note:     Joi.string().allow(''),
+  method:   Joi.string().required(),
+  date:     Joi.date().required(),
 });
 
-// Get all expenses for logged-in user
-router.get('/', auth, async (req, res) => {
-  try {
-    const expenses = await Expense.find({ userId: req.user.id }).sort({ date: -1 });
-    res.json(expenses);
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch expenses' });
-  }
-});
+router.post('/add',          auth, validate(expenseSchema), addExpense);
+router.get('/',           auth,                  getExpenses);
+router.put('/:id',  auth, can('canEdit'), updateExpense);
+router.delete('/:id',     auth, can('canDelete'), deleteExpense);
 
 module.exports = router;

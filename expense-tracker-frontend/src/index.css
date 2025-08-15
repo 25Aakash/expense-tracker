@@ -31,3 +31,16 @@ code {
   background: #555;
 }
 
+body.bg-dark {
+  background-color: #121212 !important;
+  color: #ffffff !important;
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  border-radius: 20px;
+  border: 1px solid rgba(200, 200, 200, 0.2);
+}
+
+

@@ -1,0 +1,7 @@
+.landing-bg {
+  background: linear-gradient(135deg, #e0e7ff 0%, #f0fdfa 100%);
+}
+.landing-card {
+  background: rgba(255,255,255,0.95);
+  max-width: 400px;
+}

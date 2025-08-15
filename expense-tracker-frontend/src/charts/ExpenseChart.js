@@ -1,3 +1,4 @@
+// src/charts/ExpenseChart.js
 import React from 'react';
 import { Bar } from 'react-chartjs-2';
 import {
@@ -9,21 +10,24 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
+import { useTranslation } from 'react-i18next';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 function ExpenseChart({ expenses }) {
-  const categoryTotals = {};
+  const { t } = useTranslation();
 
-  expenses.forEach((expense) => {
-    categoryTotals[expense.category] = (categoryTotals[expense.category] || 0) + expense.amount;
+  /* ---------- aggregate totals ---------- */
+  const categoryTotals = {};
+  expenses.forEach(e => {
+    categoryTotals[e.category] = (categoryTotals[e.category] || 0) + e.amount;
   });
 
   const data = {
     labels: Object.keys(categoryTotals),
     datasets: [
       {
-        label: 'Expenses by Category',
+        label: t('expensesByCategory'),
         data: Object.values(categoryTotals),
         backgroundColor: 'rgba(255, 99, 132, 0.6)',
         borderRadius: 6,
@@ -36,29 +40,25 @@ function ExpenseChart({ expenses }) {
     plugins: {
       title: {
         display: true,
-        text: 'Expenses by Category',
+        text: t('expensesByCategory'),
       },
-      legend: {
-        display: false,
-      },
+      legend: { display: false },
     },
     scales: {
       y: {
         beginAtZero: true,
         ticks: {
-          callback: function (value) {
-            return `₹${value}`;
-          },
+          callback: value => `₹${value}`,
         },
       },
     },
   };
 
   return (
-  <div>
-    <h5 className="mb-3 text-center">Expense Chart</h5>
-  <Bar data={data} options={options} />
-  </div>
+    <div>
+      <h5 className="mb-3 text-center">{t('expenseChart')}</h5>
+      <Bar data={data} options={options} />
+    </div>
   );
 }
 
