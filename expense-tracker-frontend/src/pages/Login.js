@@ -1,67 +1,123 @@
+// src/pages/Login.js
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import API from '../services/api';
 import { toast } from 'react-toastify';
+import { updatePerms } from '../utils/permissionStore';
+import 'bootstrap-icons/font/bootstrap-icons.css';          // Bootstrap Icons
 
-function Login() {
-  const [form, setForm] = useState({ identifier: '', password: '' });
-  const navigate = useNavigate();
+export default function Login() {
+  /* ---------- state ---------- */
+  const [form,   setForm] = useState({ identifier: '', password: '' });
+  const [busy,   setBusy] = useState(false);
+  const [showPw, setShow] = useState(false);
 
+  /* ---------- submit ---------- */
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setBusy(true);
     try {
-      const res = await API.post('/auth/login', form);
-      const token = res.data.token;
-      localStorage.setItem('token', token);
-      
-      // ✅ Decode JWT (without library)
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      const isAdmin = payload.isAdmin;
-      localStorage.setItem('isAdmin', isAdmin);
+      const { data } = await API.post('/auth/login', form);
 
-      toast.success("Login successful");
-      
-      if (isAdmin) {
-        navigate('/admin');
-      } else {
-        navigate('/');
-      }
-    } catch (err) {
-      toast.error("Invalid credentials");
+      /* cache everything */
+      localStorage.setItem('token',        data.token);
+      localStorage.setItem('permissions',  JSON.stringify(data.permissions || {}));
+      localStorage.setItem('role',         data.user.role);
+      localStorage.setItem('name',         data.user.name);
+      localStorage.setItem('email',        data.user.email);
+
+      toast.success('Login successful');
+      updatePerms(data.permissions || {});
+
+      const dest =
+        data.user.role === 'admin'   ? '/admin'   :
+        data.user.role === 'manager' ? '/manager' :
+                                       '/dashboard';
+
+      window.location.replace(dest);    // full reload
+    } catch {
+      toast.error('Invalid credentials');
     }
+    setBusy(false);
   };
 
+  /* ---------- ui ---------- */
   return (
-    <div className="container d-flex justify-content-center align-items-center vh-100">
-      <div className="card shadow-sm p-4" style={{ maxWidth: '400px', width: '100%' }}>
-        <h3 className="text-center mb-4 text-primary fw-bold">Login</h3>
+    <div
+      className="vh-100 d-flex align-items-center justify-content-center"
+      style={{ background: 'linear-gradient(135deg, #dbeafe, #f0f9ff)' }}
+    >
+      <div
+        className="card p-4 shadow-lg border-0 animate__animated animate__fadeInUp"
+        style={{
+          width: '100%',
+          maxWidth: 420,
+          borderRadius: 20,
+          backdropFilter: 'blur(12px)',
+          backgroundColor: 'rgba(255,255,255,0.75)'
+        }}
+      >
+        {/* header */}
+        <h3 className="text-center mb-4 text-primary fw-bold">
+          <i className="bi bi-person-circle me-2"></i>
+          Login
+        </h3>
+
+        {/* form */}
         <form onSubmit={handleSubmit}>
-          <div className="mb-3">
+          {/* identifier */}
+          <div className="form-floating mb-3">
             <input
+              id="identifier"
               type="text"
               className="form-control"
               placeholder="Email or Mobile"
+              value={form.identifier}
+              onChange={e => setForm({ ...form, identifier: e.target.value })}
               required
-              onChange={(e) => setForm({ ...form, identifier: e.target.value })}
             />
+            <label htmlFor="identifier">
+              <i className="bi bi-envelope"></i> Email or Mobile
+            </label>
           </div>
-          <div className="mb-3">
+
+          {/* password */}
+          <div className="form-floating mb-4 position-relative">
             <input
-              type="password"
-              className="form-control"
+              id="password"
+              type={showPw ? 'text' : 'password'}
+              className="form-control pe-5"
               placeholder="Password"
+              value={form.password}
+              onChange={e => setForm({ ...form, password: e.target.value })}
               required
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
             />
+            <label htmlFor="password">
+              <i className="bi bi-lock"></i> Password
+            </label>
+
+            {/* eye toggle */}
+            <span
+              role="button"
+              className="position-absolute top-50 end-0 translate-middle-y pe-3 text-muted"
+              onClick={() => setShow(!showPw)}
+            >
+              {showPw ? <FaEyeSlash /> : <FaEye />}
+            </span>
           </div>
-          <button className="btn btn-primary w-100 rounded-pill">Login</button>
+
+          {/* submit */}
+          <button className="btn btn-primary w-100 rounded-pill py-2 shadow-sm" disabled={busy}>
+            {busy ? 'Logging in…' : 'Login'}
+          </button>
         </form>
-        <p className="text-center mt-3 small">
-          Don't have an account? <a href="/register">Register</a>
+
+        {/* footnote */}
+        <p className="text-center small mt-4 mb-0">
+          Don’t have an account?{' '}
+          <a href="/register" className="text-decoration-none">Register</a>
         </p>
       </div>
     </div>
   );
 }
-
-export default Login;

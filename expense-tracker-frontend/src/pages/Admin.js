@@ -1,118 +1,150 @@
 import React, { useEffect, useState } from 'react';
-import API from '../services/api';
+import { useNavigate } from 'react-router-dom';
+import {
+  getAllUsers,
+  deleteUser,
+  updateUserRole
+} from '../services/api';
 import { toast } from 'react-toastify';
+import { useTranslation } from 'react-i18next';
+import 'bootstrap-icons/font/bootstrap-icons.css';
+
+const ROLES = ['user', 'manager', 'admin'];
 
 function Admin() {
   const [users, setUsers] = useState([]);
-  const [selectedUserId, setSelectedUserId] = useState(null);
-  const [userData, setUserData] = useState({ incomes: [], expenses: [] });
-
-  const fetchUsers = async () => {
-    try {
-      const res = await API.get('/admin/users');
-      setUsers(res.data);
-    } catch (err) {
-      toast.error('Failed to load users');
-    }
-  };
-
-  const deleteUser = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this user and all their data?')) return;
-    try {
-      await API.delete(`/admin/users/${id}`);
-      toast.success('User deleted');
-      fetchUsers();
-      if (selectedUserId === id) {
-        setSelectedUserId(null);
-        setUserData({ incomes: [], expenses: [] });
-      }
-    } catch (err) {
-      toast.error('Failed to delete user');
-    }
-  };
-
-  const viewUserData = async (id) => {
-    try {
-      const [incomesRes, expensesRes] = await Promise.all([
-        API.get(`/admin/users/${id}/incomes`),
-        API.get(`/admin/users/${id}/expenses`)
-      ]);
-      setUserData({
-        incomes: incomesRes.data,
-        expenses: expensesRes.data
-      });
-      setSelectedUserId(id);
-    } catch (err) {
-      toast.error("Failed to fetch user data");
-    }
-  };
+  const [managers, setManagers] = useState([]);
+  const nav = useNavigate();
+  const { t } = useTranslation();
 
   useEffect(() => {
-    fetchUsers();
-  }, []);
+    (async () => {
+      try {
+        const { data } = await getAllUsers();
+        setUsers(data);
+        setManagers(data.filter((u) => u.role === 'manager'));
+      } catch {
+        toast.error(t('loadUsersError'));
+      }
+    })();
+  }, [t]);
+
+  const handleDelete = async (id) => {
+    if (!window.confirm(t('confirmDeleteUser'))) return;
+    try {
+      await deleteUser(id);
+      setUsers((u) => u.filter((x) => x._id !== id));
+      toast.success(t('userDeleted'));
+    } catch {
+      toast.error(t('deleteFailed'));
+    }
+  };
+
+  const patchUser = async (id, body) => {
+    try {
+      await updateUserRole(id, body);
+      setUsers((list) =>
+        list.map((u) => (u._id === id ? { ...u, ...body } : u))
+      );
+      toast.success(t('userUpdated'));
+    } catch {
+      toast.error(t('updateFailed'));
+    }
+  };
 
   return (
-    <div className="container mt-4">
-      <h2 className="text-center mb-4">Admin Panel</h2>
-      <div className="row">
-        {users.map((u) => (
-          <div className="col-md-4" key={u._id}>
-            <div className="card mb-4 shadow-sm">
-              <div className="card-body">
-                <h5>{u.name}</h5>
-                <p>Email: {u.email}</p>
-                <p>Mobile: {u.mobile}</p>
-                <div className="d-flex gap-2">
-                  <button
-                    className="btn btn-secondary btn-sm"
-                    onClick={() => viewUserData(u._id)}
-                  >
-                    View Data
-                  </button>
-                  <button
-                    className="btn btn-danger btn-sm"
-                    onClick={() => deleteUser(u._id)}
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
+    <div
+      className="min-vh-100 d-flex flex-column"
+      style={{ background: 'linear-gradient(135deg,#e0f2fe,#f0f9ff,#fff7ed)' }}
+    >
+      <div className="container py-4">
+        <h3 className="mb-4 text-primary d-flex align-items-center gap-2">
+          <i className="bi bi-shield-lock-fill"></i> {t('adminUserMgmt')}
+        </h3>
 
-      {selectedUserId && (
-        <div className="mt-5">
-          <h4 className="mb-3">Transactions for Selected User</h4>
+        <div
+          className="glass-card p-3 rounded-4 shadow-sm"
+          style={{ backdropFilter: 'blur(10px)', background: 'rgba(255, 255, 255, 0.9)' }}
+        >
+          <div className="table-responsive">
+            <table className="table align-middle table-hover">
+              <thead className="table-light">
+                <tr>
+                  <th>{t('name')}</th>
+                  <th>{t('email')}</th>
+                  <th style={{ width: 120 }}>{t('role')}</th>
+                  <th style={{ width: 200 }}>{t('manager')}</th>
+                  <th className="text-end" style={{ width: 130 }}>{t('actions')}</th>
+                </tr>
+              </thead>
 
-          <div className="row">
-            <div className="col-md-6">
-              <h5>Incomes</h5>
-              <ul className="list-group mb-4">
-                {userData.incomes.length === 0 && <li className="list-group-item">No income found.</li>}
-                {userData.incomes.map((i, index) => (
-                  <li key={index} className="list-group-item">
-                    ₹{i.amount} - {i.category} ({i.method}) on {i.date?.slice(0, 10)}
-                  </li>
+              <tbody>
+                {users.map((u) => (
+                  <tr key={u._id}>
+                    <td>{u.name}</td>
+                    <td className="small text-muted">{u.email}</td>
+                    <td>
+                      <select
+                        className="form-select form-select-sm"
+                        value={u.role}
+                        onChange={(e) => patchUser(u._id, { role: e.target.value })}
+                      >
+                        {ROLES.map((r) => (
+                          <option key={r} value={r}>{t(r)}</option>
+                        ))}
+                      </select>
+                    </td>
+
+                    <td>
+                      {u.role === 'admin' ? (
+                        <span className="text-muted">—</span>
+                      ) : (
+                        <select
+                          className="form-select form-select-sm"
+                          value={u.managerId ? u.managerId._id : ''}
+                          onChange={(e) =>
+                            patchUser(u._id, { managerId: e.target.value || null })
+                          }
+                        >
+                          <option value="">{t('noManager')}</option>
+                          {managers.map((m) => (
+                            <option key={m._id} value={m._id}>
+                              {m.name}
+                            </option>
+                          ))}
+                        </select>
+                      )}
+                    </td>
+
+                    <td className="text-end">
+                      <button
+                        className="btn btn-sm btn-outline-primary me-2"
+                        onClick={() => nav(`/admin/users/${u._id}`)}
+                      >
+                        <i className="bi bi-eye"></i>
+                      </button>
+                      <button
+                        className="btn btn-sm btn-outline-danger"
+                        onClick={() => handleDelete(u._id)}
+                      >
+                        <i className="bi bi-trash"></i>
+                      </button>
+                    </td>
+                  </tr>
                 ))}
-              </ul>
-            </div>
 
-            <div className="col-md-6">
-              <h5>Expenses</h5>
-              <ul className="list-group mb-4">
-                {userData.expenses.length === 0 && <li className="list-group-item">No expenses found.</li>}
-                {userData.expenses.map((e, index) => (
-                  <li key={index} className="list-group-item">
-                    ₹{e.amount} - {e.category} ({e.method}) on {e.date?.slice(0, 10)}
-                  </li>
-                ))}
-              </ul>
-            </div>
+                {users.length === 0 && (
+                  <tr>
+                    <td colSpan="5" className="text-center text-muted">
+                      {t('noUsers')}
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }

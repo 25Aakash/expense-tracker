@@ -1,10 +1,13 @@
 import React from 'react';
 import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable'; // ✅ Correct import
+import autoTable from 'jspdf-autotable';
+import { useTranslation } from 'react-i18next';
 
 function ExportButtons({ expenses }) {
+  const { t } = useTranslation();
+
   const exportToCSV = () => {
-    const headers = ['Title,Amount,Category,Date,Note'];
+    const headers = [`${t('title')},${t('amount')},${t('category')},${t('date')},${t('note')}`];
     const rows = expenses.map(exp =>
       `${exp.title},${exp.amount},${exp.category},${new Date(exp.date).toLocaleDateString()},${exp.note || ''}`
     );
@@ -21,9 +24,9 @@ function ExportButtons({ expenses }) {
 
   const exportToPDF = () => {
     const doc = new jsPDF();
-    doc.text('Expense Report', 14, 15);
+    doc.text(t('expenseReport'), 14, 15);
 
-    const tableColumn = ['Title', 'Amount', 'Category', 'Date', 'Note'];
+    const tableColumn = [t('title'), t('amount'), t('category'), t('date'), t('note')];
     const tableRows = expenses.map(exp => [
       exp.title,
       `₹${exp.amount}`,
@@ -44,10 +47,10 @@ function ExportButtons({ expenses }) {
   return (
     <div className="mb-3 d-flex justify-content-end gap-2">
       <button onClick={exportToCSV} className="btn btn-outline-primary">
-        Export CSV
+        {t('exportCSV')}
       </button>
       <button onClick={exportToPDF} className="btn btn-outline-danger">
-        Export PDF
+        {t('exportPDF')}
       </button>
     </div>
   );

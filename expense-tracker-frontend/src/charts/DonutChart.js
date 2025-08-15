@@ -2,15 +2,16 @@
 import React from 'react';
 import { Doughnut } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import { useTranslation } from 'react-i18next';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 function DonutChart({ totalIncome, totalExpense }) {
+  const { t } = useTranslation();
   const balance = totalIncome - totalExpense;
-  const total = totalIncome + totalExpense;
 
   const data = {
-    labels: ['Income', 'Expense'],
+    labels: [t('income'), t('expense')],
     datasets: [
       {
         data: [totalIncome, totalExpense],
@@ -36,8 +37,8 @@ function DonutChart({ totalIncome, totalExpense }) {
         <Doughnut data={data} options={options} />
       </div>
       <div className="position-absolute text-center">
-        <h4 className="text-primary">Balance</h4>
-        <h5 className="fw-bold">₹{balance}</h5>
+        <h4 className="text-primary mb-1">{t('netBalance')}</h4>
+        <h5 className="fw-bold text-dark">₹{balance}</h5>
       </div>
     </div>
   );

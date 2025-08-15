@@ -1,119 +1,143 @@
+// src/pages/Dashboard.js
 import React, { useEffect, useState, useCallback } from 'react';
 import API from '../services/api';
 import ExpenseForm from '../components/ExpenseForm';
 import ExpenseChart from '../charts/ExpenseChart';
 import IncomeForm from '../components/IncomeForm';
 import ExpenseTrendChart from '../charts/ExpenseTrendChart';
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from '../components/LanguageSwitcher';
+import { FaArrowUp, FaArrowDown, FaWallet } from 'react-icons/fa';   // icons for cards
+import CountUp from 'react-countup';                                 // ✨ smooth counter
 
-function Dashboard() {
+export default function Dashboard() {
+  const { t } = useTranslation();
+
+  /* ---------------- state ---------------- */
   const [expenses, setExpenses] = useState([]);
-  const [incomes, setIncomes] = useState([]);
-  const [filteredExpenses, setFilteredExpenses] = useState([]);
-  const [filteredIncomes, setFilteredIncomes] = useState([]);
-  const [filters, setFilters] = useState({ category: '', startDate: '', endDate: '' });
+  const [incomes,  setIncomes] = useState([]);
+  const [filteredExpenses, setFilteredExp] = useState([]);
+  const [filteredIncomes,  setFilteredInc] = useState([]);
+  const [filters] = useState({ category:'', startDate:'', endDate:'' });
   const [showForm, setShowForm] = useState('income');
 
+  const permissions = JSON.parse(localStorage.getItem('permissions') || '{}');
+
+  /* ---------------- fetch helpers ---------------- */
+  const handleUnauthorized = () => {
+    localStorage.removeItem('token');
+    window.location.href = '/login';
+  };
+
   const fetchExpenses = async () => {
-    const res = await API.get('/expenses');
-    setExpenses(res.data);
+    try       { setExpenses((await API.get('/expenses')).data); }
+    catch (e) { if (e.response?.status === 401) handleUnauthorized(); }
   };
 
   const fetchIncomes = async () => {
-    const res = await API.get('/incomes');
-    setIncomes(res.data);
+    try       { setIncomes((await API.get('/incomes')).data); }
+    catch (e) { if (e.response?.status === 401) handleUnauthorized(); }
   };
 
+  /* ---------------- filters ---------------- */
   const applyFilters = useCallback(() => {
-    let exp = [...expenses];
-    let inc = [...incomes];
+    const dateIn = (d, s) => new Date(d) >= new Date(s);
+    const dateLt = (d, e) => new Date(d) <= new Date(e);
 
-    if (filters.category) {
-      exp = exp.filter(e => e.category === filters.category);
-      inc = inc.filter(i => i.category === filters.category);
-    }
-    if (filters.startDate) {
-      exp = exp.filter(e => new Date(e.date) >= new Date(filters.startDate));
-      inc = inc.filter(i => new Date(i.date) >= new Date(filters.startDate));
-    }
-    if (filters.endDate) {
-      exp = exp.filter(e => new Date(e.date) <= new Date(filters.endDate));
-      inc = inc.filter(i => new Date(i.date) <= new Date(filters.endDate));
-    }
-
-    setFilteredExpenses(exp);
-    setFilteredIncomes(inc);
+    const exp = expenses.filter(e =>
+      (!filters.category  || e.category === filters.category) &&
+      (!filters.startDate || dateIn(e.date, filters.startDate)) &&
+      (!filters.endDate   || dateLt(e.date,  filters.endDate))
+    );
+    const inc = incomes.filter(i =>
+      (!filters.category  || i.category === filters.category) &&
+      (!filters.startDate || dateIn(i.date, filters.startDate)) &&
+      (!filters.endDate   || dateLt(i.date,  filters.endDate))
+    );
+    setFilteredExp(exp);
+    setFilteredInc(inc);
   }, [expenses, incomes, filters]);
 
-  useEffect(() => {
-    fetchExpenses();
-    fetchIncomes();
-  }, []);
+  /* ---------------- lifecycle ---------------- */
+  useEffect(() => { fetchExpenses(); fetchIncomes(); }, []);
+  useEffect(() => { applyFilters(); }, [expenses, incomes, filters, applyFilters]);
 
-  useEffect(() => {
-    applyFilters();
-  }, [expenses, incomes, filters, applyFilters]);
+  /* ---------------- totals ---------------- */
+  const totalIncome  = filteredIncomes.reduce((a, i) => a + i.amount, 0);
+  const totalExpense = filteredExpenses.reduce((a, e) => a + e.amount, 0);
+  const balance      = totalIncome - totalExpense;
 
-  const totalIncome = filteredIncomes.reduce((acc, income) => acc + income.amount, 0);
-  const totalExpense = filteredExpenses.reduce((acc, expense) => acc + expense.amount, 0);
-  const balance = totalIncome - totalExpense;
+  /* ---------------- reusable card ---------------- */
+  const StatCard = ({ icon, title, value, color }) => (
+    <div className="col">
+      <div
+        className={`card text-center border-0 shadow-sm h-100 glass-card`}
+        style={{ backdropFilter:'blur(6px)', background:'rgba(255,255,255,0.7)' }}
+      >
+        <div className="card-body py-4">
+          <div className={`mb-2 fs-4 text-${color}`}>{icon}</div>
+          <h6 className={`fw-semibold text-${color} mb-1`}>{title}</h6>
+          {/* CountUp makes the number roll up smoothly */}
+          <h4 className="fw-bold">
+            ₹<CountUp end={value} duration={1} decimals={2} />
+          </h4>
+        </div>
+      </div>
+    </div>
+  );
 
+  /* ---------------- UI ---------------- */
   return (
     <div className="container py-4">
-      {/* Updated heading section */}
-      <div className="mb-3">
-        <h4 className="text-primary text-start">Dashboard</h4>
+      <LanguageSwitcher />
+
+      <h4 className="text-primary fw-bold mb-4">{t('dashboard')}</h4>
+
+      {/* === STAT CARDS === */}
+      <div className="row row-cols-1 row-cols-md-3 g-3 mb-5">
+        <StatCard
+          icon={<FaArrowUp />}
+          title={t('totalIncome')}
+          value={totalIncome}
+          color="success"
+        />
+        <StatCard
+          icon={<FaArrowDown />}
+          title={t('totalExpense')}
+          value={totalExpense}
+          color="danger"
+        />
+        <StatCard
+          icon={<FaWallet />}
+          title={t('netBalance')}
+          value={balance}
+          color="primary"
+        />
       </div>
 
-      {/* Summary Cards: responsive one-line layout */}
-      <div className="row row-cols-1 row-cols-md-3 g-3 mb-4">
-        <div className="col">
-          <div className="card text-center bg-light h-100 shadow-sm">
-            <div className="card-body">
-              <h6 className="text-success mb-2">Total Income</h6>
-              <h4>₹{totalIncome.toFixed(2)}</h4>
-            </div>
-          </div>
+      {/* === ADD TXN BUTTONS === */}
+      {permissions.canAdd && (
+        <div className="text-center mb-5">
+          <button
+            className={`btn btn-success rounded-pill px-4 me-2 shadow ${showForm==='income' && 'btn-lg'}`}
+            data-bs-toggle="modal"
+            data-bs-target="#addTransactionModal"
+            onClick={() => setShowForm('income')}
+          >
+            {t('addIncome')}
+          </button>
+          <button
+            className={`btn btn-danger rounded-pill px-4 shadow ${showForm==='expense' && 'btn-lg'}`}
+            data-bs-toggle="modal"
+            data-bs-target="#addTransactionModal"
+            onClick={() => setShowForm('expense')}
+          >
+            {t('addExpense')}
+          </button>
         </div>
-        <div className="col">
-          <div className="card text-center bg-light h-100 shadow-sm">
-            <div className="card-body">
-              <h6 className="text-danger mb-2">Total Expenses</h6>
-              <h4>₹{totalExpense.toFixed(2)}</h4>
-            </div>
-          </div>
-        </div>
-        <div className="col">
-          <div className="card text-center bg-light h-100 shadow-sm">
-            <div className="card-body">
-              <h6 className="text-primary mb-2">Net Balance</h6>
-              <h4>₹{balance.toFixed(2)}</h4>
-            </div>
-          </div>
-        </div>
-      </div>
+      )}
 
-      {/* Add Buttons */}
-      <div className="text-center mb-4">
-        <button
-          className="btn btn-success me-2 px-4"
-          data-bs-toggle="modal"
-          data-bs-target="#addTransactionModal"
-          onClick={() => setShowForm('income')}
-        >
-          Add Income
-        </button>
-
-        <button
-          className="btn btn-danger px-4"
-          data-bs-toggle="modal"
-          data-bs-target="#addTransactionModal"
-          onClick={() => setShowForm('expense')}
-        >
-          Add Expense
-        </button>
-      </div>
-
-      {/* Charts */}
+      {/* === CHARTS === */}
       <div className="row">
         <div className="col-12 col-md-6 mb-4">
           <ExpenseTrendChart expenses={filteredExpenses} />
@@ -123,33 +147,39 @@ function Dashboard() {
         </div>
       </div>
 
-      {/* Modal */}
-      <div className="modal fade" id="addTransactionModal" tabIndex="-1" aria-labelledby="addTransactionModalLabel" aria-hidden="true">
-        <div className="modal-dialog modal-dialog-centered">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title">Add Transaction</h5>
-              <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
+      {/* === ADD TXN MODAL === */}
+      {permissions.canAdd && (
+        <div className="modal fade" id="addTransactionModal" tabIndex="-1" aria-hidden="true">
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content border-0 shadow-lg">
+              <div className="modal-header border-0 pb-0">
+                <h5 className="modal-title fw-bold">
+                  {showForm === 'income' ? t('addIncome') : t('addExpense')}
+                </h5>
+                <button className="btn-close" data-bs-dismiss="modal" />
+              </div>
 
-            <div className="d-flex justify-content-center gap-3 my-3">
-              <button className={`btn ${showForm === 'income' ? 'btn-success' : 'btn-outline-success'}`} onClick={() => setShowForm('income')}>Income</button>
-              <button className={`btn ${showForm === 'expense' ? 'btn-danger' : 'btn-outline-danger'}`} onClick={() => setShowForm('expense')}>Expense</button>
-            </div>
+              <div className="modal-body pt-0">
+                {/* toggle pills */}
+                <div className="d-flex justify-content-center gap-3 my-3">
+                  <button
+                    className={`btn rounded-pill ${showForm==='income' ? 'btn-success' : 'btn-outline-success'}`}
+                    onClick={() => setShowForm('income')}
+                  >{t('income')}</button>
+                  <button
+                    className={`btn rounded-pill ${showForm==='expense' ? 'btn-danger' : 'btn-outline-danger'}`}
+                    onClick={() => setShowForm('expense')}
+                  >{t('expense')}</button>
+                </div>
 
-            <div className="modal-body">
-              {showForm === 'income' ? (
-                <IncomeForm onAdd={fetchIncomes} />
-              ) : (
-                <ExpenseForm onAdd={fetchExpenses} />
-              )}
+                {showForm === 'income'
+                  ? <IncomeForm  onAdd={fetchIncomes}  disabled={!permissions.canAdd} />
+                  : <ExpenseForm onAdd={fetchExpenses} disabled={!permissions.canAdd} />}
+              </div>
             </div>
           </div>
         </div>
-      </div>
-
+      )}
     </div>
   );
 }
-
-export default Dashboard;

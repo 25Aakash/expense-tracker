@@ -1,16 +1,12 @@
 const express = require('express');
-const router = express.Router();
-const User = require('../models/User');
-const auth = require('../middleware/auth');
+const router  = express.Router();
+const auth    = require('../middleware/auth');
+const { getProfile } = require('../controllers/profileController');
 
-// ✅ Get Profile Info
-router.get('/me', auth, async (req, res) => {
-  try {
-    const user = await User.findById(req.user.id).select('-password');
-    res.json(user);
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to load profile' });
-  }
-});
+// New explicit “me” endpoint 👇
+router.get('/me', auth, getProfile);
+
+// (optional) keep the root path too
+router.get('/',   auth, getProfile);
 
 module.exports = router;

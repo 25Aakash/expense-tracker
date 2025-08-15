@@ -1,36 +1,64 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Dashboard from './pages/Dashboard';
-import Layout from './components/Layout';
-import Transactions from './pages/Transactions';
-import Reports from './pages/Reports';
-import Profile from './pages/Profile';
-import Admin from './pages/Admin';
-import Login from './pages/Login';
-import Register from './pages/Register';
 import AuthenticatedLayout from './components/AuthenticatedLayout';
-import NotFound from './pages/NotFound';
+
+import Login              from './pages/Login';
+import Register           from './pages/Register';
+import Landing            from './pages/Landing';
+import Dashboard          from './pages/Dashboard';
+import Reports            from './pages/Reports';
+import Transactions       from './pages/Transactions';
+import Profile            from './pages/Profile';
+import Admin              from './pages/Admin';
+import ManagerDashboard   from './pages/ManagerDashboard';
+import ManagerUserDetail  from './pages/ManagerUserDetail';
+import NotFound           from './pages/NotFound';
+import BankTransactions  from './pages/BankTransactions';
+import CashTransactions  from './pages/CashTransactions';
+import AdminUserDetails  from './pages/AdminUserDetails';
+import Categories from './pages/Categories';
+import './i18n';
+import './styles.css';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+/* ---------- helper: never crash on bad JSON ---------- */
+const safeParse = (val, fb = {}) => {
+  if (!val || val === 'undefined') return fb;
+  try { return JSON.parse(val); } catch { return fb; }
+};
+
 function App() {
+  const permissions = safeParse(localStorage.getItem('permissions'));
+
   return (
     <Router>
-      <ToastContainer position="top-right" autoClose={3000} />
+      <ToastContainer position="top-center" autoClose={3000} hideProgressBar newestOnTop theme="colored" />
       <Routes>
-
-        {/* Public Routes */}
-        <Route path="/login" element={<Login />} />
+        {/* Always show landing page at root */}
+        <Route path="/" element={<Landing />} />
+        {/* Public routes */}
+        <Route path="/login"    element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* Protected Routes inside Layout */}
-        <Route path="/" element={<Layout><AuthenticatedLayout><Dashboard /></AuthenticatedLayout></Layout>} />
-        <Route path="/transactions" element={<Layout><AuthenticatedLayout><Transactions /></AuthenticatedLayout></Layout>} />
-        <Route path="/reports" element={<Layout><AuthenticatedLayout><Reports /></AuthenticatedLayout></Layout>} />
-        <Route path="/profile" element={<Layout><AuthenticatedLayout><Profile /></AuthenticatedLayout></Layout>} />
-        <Route path="/admin" element={<Layout><AuthenticatedLayout><Admin /></AuthenticatedLayout></Layout>} />
-        <Route path="*" element={<Layout><NotFound /></Layout>} />
-
+        {/* Authenticated routes under /app/* */}
+        <Route path="/app/*" element={<AuthenticatedLayout />}> 
+          <Route index                    element={<Dashboard />} />
+          <Route path="dashboard"         element={<Dashboard />} />
+          <Route path="categories" element={<Categories />} />
+          <Route path="profile"           element={<Profile />} />
+          <Route path="transactions"      element={<Transactions />} />
+          <Route path="transactions/bank"  element={<BankTransactions />} />
+          <Route path="transactions/cash"  element={<CashTransactions />} />
+          {permissions.canAccessReports && (
+            <Route path="reports"         element={<Reports />} />
+          )}
+          <Route path="admin"             element={<Admin />} />
+          <Route path="admin/users/:userId" element={<AdminUserDetails/>} />
+          <Route path="manager"           element={<ManagerDashboard />} />
+          <Route path="manager/user/:id" element={<ManagerUserDetail />} />
+          <Route path="*"                 element={<NotFound />} />
+        </Route>
       </Routes>
     </Router>
   );

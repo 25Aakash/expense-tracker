@@ -1,11 +1,21 @@
 import React from 'react';
-import Navbar from './Navbar';
+import Navbar    from './Navbar';
 import SubNavbar from './SubNavbar';
 import { useLocation } from 'react-router-dom';
 
 function Layout({ children }) {
-  const location = useLocation();
-  const showMainNavbar = location.pathname === '/';
+  const { pathname } = useLocation();
+
+  // 🌟 Add any “home-style” routes here
+  const homePaths = [
+    '/',            // redirect root
+    '/dashboard',
+    '/profile',
+    '/admin',
+    '/manager'
+  ];
+
+  const showMainNavbar = homePaths.includes(pathname);
 
   return (
     <>

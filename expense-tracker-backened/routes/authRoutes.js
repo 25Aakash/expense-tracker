@@ -1,50 +1,35 @@
-const express = require('express');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const User = require('../models/User');
-const router = express.Router();
+// routes/authRoutes.js
+const express      = require('express');
+const router       = express.Router();
 
-// Register
-router.post('/register', async (req, res) => {
-  try {
-    const { name, email, mobile, password } = req.body;
+const rateLimiter  = require('../middleware/rateLimiter');
+const auth         = require('../middleware/auth');
+const validate     = require('../middleware/validate');
+const schemas      = require('../validation/authSchemas');
 
-    const emailExists = await User.findOne({ email });
-    const mobileExists = await User.findOne({ mobile });
-    if (emailExists) return res.status(400).json({ error: "Email already exists" });
-    if (mobileExists) return res.status(400).json({ error: "Mobile number already exists" });
+const {
+  registerRequest,
+  resendOtp,
+  verifyOtp,
+  login,
+  requestReset,
+  confirmReset,
+  changePassword,
+} = require('../controllers/authController');
 
-    const hashed = await bcrypt.hash(password, 10);
-    const user = new User({ name, email, mobile, password: hashed });
-    await user.save();
-    res.status(201).json({ message: "User registered" });
-  } catch (err) {
-    res.status(500).json({ error: "Registration failed" });
-  }
-});
+// ── Registration & OTP ───────────────────────────────────────
+router.post('/register-request', rateLimiter, validate(schemas.registerRequest), registerRequest);
+router.post('/resend-otp',       rateLimiter, resendOtp);
+router.post('/verify-otp', verifyOtp);
 
-// Login
-router.post('/login', async (req, res) => {
-  const { identifier, password } = req.body;
+// ── Login ────────────────────────────────────────────────────
+router.post('/login', validate(schemas.login), login);
 
-  const user = await User.findOne({
-    $or: [
-      { email: identifier },
-      { mobile: identifier }
-    ]
-  });
+// ── Forgot-password (OTP reset) ──────────────────────────────
+router.post('/request-reset',  rateLimiter, validate(schemas.requestReset),  requestReset);
+router.post('/confirm-reset',  rateLimiter, validate(schemas.confirmReset),  confirmReset);
 
-  if (!user) return res.status(404).json({ error: "User not found" });
-
-  const isMatch = await bcrypt.compare(password, user.password);
-  if (!isMatch) return res.status(401).json({ error: "Invalid credentials" });
-
-const token = jwt.sign(
-  { id: user._id, name: user.name, isAdmin: user.isAdmin },
-  process.env.JWT_SECRET,
-  { expiresIn: "1d" }
-);
-  res.json({ token, user: { name: user.name, email: user.email, mobile: user.mobile } });
-});
+// ── Logged-in password change ───────────────────────────────
+router.post('/change-password', auth, validate(schemas.changePassword), changePassword);
 
 module.exports = router;
