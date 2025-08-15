@@ -35,14 +35,14 @@ function App() {
     <Router>
       <ToastContainer position="top-center" autoClose={3000} hideProgressBar newestOnTop theme="colored" />
       <Routes>
-        {/* Always show landing page at root */}
+        {/* Landing page at root */}
         <Route path="/" element={<Landing />} />
         {/* Public routes */}
         <Route path="/login"    element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* Authenticated routes under /app/* */}
-        <Route path="/app/*" element={<AuthenticatedLayout />}> 
+        {/* Authenticated routes at root level */}
+        <Route path="/*" element={<AuthenticatedLayout />}> 
           <Route index                    element={<Dashboard />} />
           <Route path="dashboard"         element={<Dashboard />} />
           <Route path="categories" element={<Categories />} />
