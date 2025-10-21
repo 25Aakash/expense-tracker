@@ -29,7 +29,7 @@ const safeParse = (val, fb = {}) => {
 };
 
 function App() {
-  const permissions = safeParse(localStorage.getItem('permissions'));
+  const permissions = safeParse(localStorage.getItem('permissions') || sessionStorage.getItem('permissions'));
 
   return (
     <Router>

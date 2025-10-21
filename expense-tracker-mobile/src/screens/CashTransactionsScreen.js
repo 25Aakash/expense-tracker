@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect} from 'react';
 import {
   View,
   StyleSheet,
@@ -66,6 +66,7 @@ const CashTransactionsScreen = ({ navigation }) => {
   useEffect(() => {
     filterTransactions();
   }, [transactions, searchQuery, filterType]);
+
 
   const loadTransactions = async () => {
     try {

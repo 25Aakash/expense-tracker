@@ -1,5 +1,5 @@
 // src/pages/Login.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import API from '../services/api';
 import { toast } from 'react-toastify';
@@ -8,9 +8,21 @@ import 'bootstrap-icons/font/bootstrap-icons.css';          // Bootstrap Icons
 
 export default function Login() {
   /* ---------- state ---------- */
-  const [form,   setForm] = useState({ identifier: '', password: '' });
-  const [busy,   setBusy] = useState(false);
-  const [showPw, setShow] = useState(false);
+  const [form,      setForm] = useState({ identifier: '', password: '' });
+  const [busy,      setBusy] = useState(false);
+  const [showPw,    setShow] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+
+  /* ---------- load saved credentials ---------- */
+  useEffect(() => {
+    const savedRemember = localStorage.getItem('rememberMe');
+    const savedIdentifier = localStorage.getItem('savedIdentifier');
+    
+    if (savedRemember === 'true' && savedIdentifier) {
+      setForm(prev => ({ ...prev, identifier: savedIdentifier }));
+      setRememberMe(true);
+    }
+  }, []);
 
   /* ---------- submit ---------- */
   const handleSubmit = async (e) => {
@@ -20,11 +32,21 @@ export default function Login() {
       const { data } = await API.post('/auth/login', form);
 
       /* cache everything */
-      localStorage.setItem('token',        data.token);
-      localStorage.setItem('permissions',  JSON.stringify(data.permissions || {}));
-      localStorage.setItem('role',         data.user.role);
-      localStorage.setItem('name',         data.user.name);
-      localStorage.setItem('email',        data.user.email);
+      const storage = rememberMe ? localStorage : sessionStorage;
+      storage.setItem('token',        data.token);
+      storage.setItem('permissions',  JSON.stringify(data.permissions || {}));
+      storage.setItem('role',         data.user.role);
+      storage.setItem('name',         data.user.name);
+      storage.setItem('email',        data.user.email);
+      
+      // Store remember me preference
+      if (rememberMe) {
+        localStorage.setItem('rememberMe', 'true');
+        localStorage.setItem('savedIdentifier', form.identifier);
+      } else {
+        localStorage.removeItem('rememberMe');
+        localStorage.removeItem('savedIdentifier');
+      }
 
       toast.success('Login successful');
       updatePerms(data.permissions || {});
@@ -104,6 +126,20 @@ export default function Login() {
             >
               {showPw ? <FaEyeSlash /> : <FaEye />}
             </span>
+          </div>
+
+          {/* remember me */}
+          <div className="form-check mb-3">
+            <input
+              className="form-check-input"
+              type="checkbox"
+              id="rememberMe"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+            />
+            <label className="form-check-label" htmlFor="rememberMe">
+              Remember me
+            </label>
           </div>
 
           {/* submit */}

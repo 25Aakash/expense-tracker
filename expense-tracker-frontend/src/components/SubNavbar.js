@@ -10,7 +10,7 @@ function SubNavbar({ incomes = [], expenses = [], fromDate, toDate }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation();
-  const permissions = JSON.parse(localStorage.getItem('permissions') || '{}');
+  const permissions = JSON.parse(localStorage.getItem('permissions') || sessionStorage.getItem('permissions') || '{}');
 
   const pageNames = {
     "/transactions": t("transactions"),

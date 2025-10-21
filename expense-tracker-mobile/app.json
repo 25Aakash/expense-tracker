@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "ExpenseTracker Pro",
-    "slug": "expense-tracker-pro",
+  "name": "DailyCashBook",
+  "slug": "dailycashbook",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -9,7 +9,10 @@
     "newArchEnabled": true,
     "description": "A comprehensive expense tracking app for personal and team financial management with multi-role support.",
     "privacy": "public",
-    "platforms": ["ios", "android"],
+    "platforms": [
+      "ios",
+      "android"
+    ],
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
@@ -53,8 +56,15 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "your-project-id-here"
+        "projectId": "28630534-7fe0-49ea-ab8d-246e2037faaa"
       }
+    },
+    "owner": "kaakash",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/28630534-7fe0-49ea-ab8d-246e2037faaa"
     }
   }
 }

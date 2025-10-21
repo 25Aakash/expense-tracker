@@ -28,6 +28,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Picker } from '@react-native-picker/picker';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { expenseAPI, categoryAPI } from '../services/api';
+import DatePicker from '../components/DatePicker';
 
 const AddExpenseScreen = ({ navigation, route }) => {
   const { transferData } = route.params || {};
@@ -37,7 +38,7 @@ const AddExpenseScreen = ({ navigation, route }) => {
     category: '',
     note: transferData?.note || '',
     date: transferData?.date || new Date().toISOString().split('T')[0],
-    method: transferData?.method || 'Bank',
+    method: transferData?.method || 'Cash',
   });
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -45,6 +46,7 @@ const AddExpenseScreen = ({ navigation, route }) => {
   const [showAddCategoryDialog, setShowAddCategoryDialog] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   // Clear transfer data params when component mounts to avoid persistence
   useEffect(() => {
@@ -151,7 +153,7 @@ const AddExpenseScreen = ({ navigation, route }) => {
           {
             text: 'OK',
             onPress: () => {
-              // Clear form data and go back to previous screen
+              // Clear form data but stay on the form
               setForm({
                 amount: '',
                 category: '',
@@ -159,8 +161,6 @@ const AddExpenseScreen = ({ navigation, route }) => {
                 date: new Date().toISOString().split('T')[0],
                 method: 'Bank',
               });
-              // Simply go back to the previous screen
-              navigation.goBack();
             },
           },
         ]
@@ -343,21 +343,37 @@ const AddExpenseScreen = ({ navigation, route }) => {
               </View>
               <Text style={styles.fieldLabel}>Date</Text>
             </View>
-            <TextInput
-              value={form.date}
-              onChangeText={(value) => handleInputChange('date', value)}
-              mode="outlined"
-              style={styles.input}
-              disabled={loading}
-              placeholder="YYYY-MM-DD"
-              outlineStyle={styles.inputOutline}
-              theme={{
-                colors: {
-                  primary: '#ef4444',
-                  outline: '#e2e8f0',
-                }
-              }}
-            />
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <TouchableOpacity
+                onPress={() => setShowDatePicker(true)}
+                disabled={loading}
+                style={[styles.input, { flex: 1, justifyContent: 'center', height: 56 }]}
+              >
+                <Text style={{ color: '#111', fontSize: 16 }}>
+                  {form.date}
+                </Text>
+              </TouchableOpacity>
+              <IconButton
+                icon="calendar"
+                size={28}
+                onPress={() => setShowDatePicker(true)}
+                disabled={loading}
+                style={{ marginLeft: 0 }}
+                color="#ef4444"
+              />
+            </View>
+            {showDatePicker && (
+              <DatePicker
+                value={new Date(form.date)}
+                onChange={(event, selectedDate) => {
+                  setShowDatePicker(false);
+                  if (selectedDate) {
+                    handleInputChange('date', selectedDate.toISOString().split('T')[0]);
+                  }
+                }}
+                mode="date"
+              />
+            )}
           </Surface>
 
           {/* Payment Method Card */}

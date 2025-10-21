@@ -18,16 +18,19 @@ import {
   Title,
   Paragraph,
   ActivityIndicator,
+  Checkbox,
 } from 'react-native-paper';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../context/AuthContext';
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const { login, loading } = useAuth();
 
   // Animation values
@@ -57,12 +60,42 @@ const LoginScreen = ({ navigation }) => {
         useNativeDriver: true,
       }),
     ]).start();
+
+    // Load saved credentials
+    loadSavedCredentials();
   }, []);
+
+  const loadSavedCredentials = async () => {
+    try {
+      const savedRemember = await AsyncStorage.getItem('rememberMe');
+      const savedEmail = await AsyncStorage.getItem('savedEmail');
+      
+      if (savedRemember === 'true' && savedEmail) {
+        setEmail(savedEmail);
+        setRememberMe(true);
+      }
+    } catch (error) {
+      console.log('Error loading saved credentials:', error);
+    }
+  };
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
+    }
+
+    // Save or remove credentials based on remember me
+    try {
+      if (rememberMe) {
+        await AsyncStorage.setItem('rememberMe', 'true');
+        await AsyncStorage.setItem('savedEmail', email.trim());
+      } else {
+        await AsyncStorage.removeItem('rememberMe');
+        await AsyncStorage.removeItem('savedEmail');
+      }
+    } catch (error) {
+      console.log('Error saving credentials:', error);
     }
 
     const result = await login(email.trim(), password);
@@ -135,11 +168,11 @@ const LoginScreen = ({ navigation }) => {
                   <View style={styles.inputContainer}>
                     <Ionicons name="mail-outline" size={20} color="#3b82f6" style={styles.inputIcon} />
                     <TextInput
-                      label="Email"
+                      label="Email or Mobile Number"
                       value={email}
                       onChangeText={setEmail}
                       mode="outlined"
-                      keyboardType="email-address"
+                      keyboardType="default"
                       autoCapitalize="none"
                       autoCorrect={false}
                       style={styles.input}
@@ -178,6 +211,32 @@ const LoginScreen = ({ navigation }) => {
                       }}
                     />
                   </View>
+
+                  {/* Remember Me Checkbox */}
+                  <View style={styles.rememberMeContainer}>
+                    <Checkbox
+                      status={rememberMe ? 'checked' : 'unchecked'}
+                      onPress={() => setRememberMe(!rememberMe)}
+                      color="#3b82f6"
+                      disabled={loading}
+                    />
+                    <TouchableOpacity 
+                      onPress={() => setRememberMe(!rememberMe)}
+                      disabled={loading}
+                      style={styles.rememberMeTextContainer}
+                    >
+                      <Text style={styles.rememberMeText}>Remember me</Text>
+                    </TouchableOpacity>
+                  </View>
+
+                  {/* Forgot Password Link */}
+                  <TouchableOpacity
+                    onPress={() => navigation.navigate('ResetPassword')}
+                    disabled={loading}
+                    style={{ alignSelf: 'flex-end', marginBottom: 8 }}
+                  >
+                    <Text style={{ color: '#3b82f6', fontWeight: '600' }}>Forgot Password?</Text>
+                  </TouchableOpacity>
 
                   <TouchableOpacity onPress={handleLogin} disabled={loading}>
                     <LinearGradient
@@ -346,6 +405,18 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#3b82f6',
     fontWeight: '600',
+  },
+  rememberMeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  rememberMeTextContainer: {
+    marginLeft: 8,
+  },
+  rememberMeText: {
+    fontSize: 14,
+    color: '#6b7280',
   },
 });
 

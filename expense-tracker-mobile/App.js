@@ -1,3 +1,6 @@
+// IMPORTANT: Keep these side‑effect imports first for proper initialization
+import 'react-native-gesture-handler';
+import 'react-native-reanimated';
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -8,8 +11,11 @@ import { StatusBar } from 'expo-status-bar';
 import LoginScreen from './src/screens/LoginScreen';
 import RegisterScreen from './src/screens/RegisterScreen';
 import OTPVerificationScreen from './src/screens/OTPVerificationScreen';
+import ResetPasswordScreen from './src/screens/ResetPasswordScreen';
 import OnboardingScreen from './src/screens/OnboardingScreenWorking';
 import MainTabNavigator from './src/navigation/MainTabNavigator';
+import AddExpenseScreen from './src/screens/AddExpenseScreen';
+import AddIncomeScreen from './src/screens/AddIncomeScreen';
 
 // Import context providers and components
 import { AuthProvider } from './src/context/AuthContext';
@@ -75,6 +81,21 @@ export default function App() {
               <Stack.Screen 
                 name="Main" 
                 component={MainTabNavigator}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen 
+                name="AddExpense" 
+                component={AddExpenseScreen}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen 
+                name="AddIncome" 
+                component={AddIncomeScreen}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen 
+                name="ResetPassword" 
+                component={ResetPasswordScreen}
                 options={{ headerShown: false }}
               />
             </Stack.Navigator>

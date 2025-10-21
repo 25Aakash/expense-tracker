@@ -6,10 +6,10 @@ function Navbar() {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
-  const [role, setRole] = useState(localStorage.getItem('role'));
-  const [email, setEmail] = useState(localStorage.getItem('email'));
+  const [role, setRole] = useState(localStorage.getItem('role') || sessionStorage.getItem('role'));
+  const [email, setEmail] = useState(localStorage.getItem('email') || sessionStorage.getItem('email'));
   const [permissions, setPermissions] = useState(
-    JSON.parse(localStorage.getItem('permissions') || '{}')
+    JSON.parse(localStorage.getItem('permissions') || sessionStorage.getItem('permissions') || '{}')
   );
 
   useEffect(() => {
@@ -19,9 +19,9 @@ function Navbar() {
 
   useEffect(() => {
     const sync = () => {
-      setRole(localStorage.getItem('role'));
-      setEmail(localStorage.getItem('email'));
-      setPermissions(JSON.parse(localStorage.getItem('permissions') || '{}'));
+      setRole(localStorage.getItem('role') || sessionStorage.getItem('role'));
+      setEmail(localStorage.getItem('email') || sessionStorage.getItem('email'));
+      setPermissions(JSON.parse(localStorage.getItem('permissions') || sessionStorage.getItem('permissions') || '{}'));
     };
     window.addEventListener('storage', sync);
     return () => window.removeEventListener('storage', sync);
@@ -29,6 +29,7 @@ function Navbar() {
 
   const logout = () => {
     localStorage.clear();
+    sessionStorage.clear();
     navigate('/login');
   };
 

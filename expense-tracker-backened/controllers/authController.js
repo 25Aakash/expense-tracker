@@ -6,7 +6,7 @@ const bcrypt = require('bcryptjs');
 const jwt    = require('jsonwebtoken');
 const User   = require('../models/User');
 const Otp    = require('../models/Otp');
-const { generateOTP, sendOtpEmail } = require('../utils/otpService');
+const { generateOTP, sendOtpEmail, sendOtpSms } = require('../utils/otpService');
 
 //─────────────────────────────────────────────────────────────
 //  Registration – send OTP
@@ -26,8 +26,9 @@ exports.registerRequest = async (req, res) => {
       { upsert: true }
     );
 
-    await sendOtpEmail(email, otp);
-    res.json({ message: 'OTP sent to email' });
+  if (email) await sendOtpEmail(email, otp);
+  if (mobile) await sendOtpSms(mobile, otp);
+  res.json({ message: 'OTP sent to email and mobile (if provided)' });
   } catch {
     res.status(500).json({ error: 'Error sending OTP' });
   }
@@ -47,8 +48,9 @@ exports.resendOtp = async (req, res) => {
     record.attempts = 0;
     await record.save();
 
-    await sendOtpEmail(email, record.code);
-    res.json({ message: 'New OTP sent' });
+  if (email) await sendOtpEmail(email, record.code);
+  if (record.formData?.mobile) await sendOtpSms(record.formData.mobile, record.code);
+  res.json({ message: 'New OTP sent to email and mobile (if provided)' });
   } catch {
     res.status(500).json({ error: 'Failed to resend OTP' });
   }
@@ -76,10 +78,9 @@ exports.verifyOtp = async (req, res) => {
       return res.status(400).json({ error: 'Incorrect OTP' });
     }
 
-    const hashed = await bcrypt.hash(record.formData.password, 10);
+    // password will be hashed by pre-save hook
     const newUser = new User({
       ...record.formData,
-      password: hashed,
       isVerified: true,
       permissions: {
         canAdd: true, canEdit: true, canDelete: true,
@@ -185,8 +186,11 @@ exports.confirmReset = async (req, res) => {
     return res.status(400).json({ error: 'Incorrect OTP' });
   }
 
-  const hashed = await bcrypt.hash(newPassword, 10);
-  await User.updateOne({ email }, { password: hashed });
+  // set new password (will be hashed by pre-save when saving user)
+  const user = await User.findOne({ email }).select('+password');
+  if (!user) return res.status(404).json({ error: 'User not found' });
+  user.password = newPassword;
+  await user.save();
   await record.deleteOne();
 
   res.json({ message: 'Password has been reset. You can now log in.' });
@@ -202,8 +206,28 @@ exports.changePassword = async (req, res) => {
   const isMatch = await bcrypt.compare(currentPassword, user.password);
   if (!isMatch) return res.status(401).json({ error: 'Current password incorrect' });
 
-  user.password = await bcrypt.hash(newPassword, 10);
+  user.password = newPassword; // hook will hash
   await user.save();
 
   res.json({ message: 'Password updated successfully' });
+};
+
+//─────────────────────────────────────────────────────────────
+//  Verify current token (stateless)
+//─────────────────────────────────────────────────────────────
+exports.verifyToken = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('-password');
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    res.json({ valid: true, user });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to verify token' });
+  }
+};
+
+//─────────────────────────────────────────────────────────────
+//  Stateless logout (client deletes token)
+//─────────────────────────────────────────────────────────────
+exports.logout = (_req, res) => {
+  res.json({ message: 'Logged out (client should discard token)' });
 };

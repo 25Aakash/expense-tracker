@@ -15,6 +15,8 @@ const {
   requestReset,
   confirmReset,
   changePassword,
+  verifyToken,
+  logout,
 } = require('../controllers/authController');
 
 // ── Registration & OTP ───────────────────────────────────────
@@ -24,6 +26,8 @@ router.post('/verify-otp', verifyOtp);
 
 // ── Login ────────────────────────────────────────────────────
 router.post('/login', validate(schemas.login), login);
+router.get('/verify', auth, verifyToken);
+router.post('/logout', auth, logout);
 
 // ── Forgot-password (OTP reset) ──────────────────────────────
 router.post('/request-reset',  rateLimiter, validate(schemas.requestReset),  requestReset);
@@ -31,5 +35,7 @@ router.post('/confirm-reset',  rateLimiter, validate(schemas.confirmReset),  con
 
 // ── Logged-in password change ───────────────────────────────
 router.post('/change-password', auth, validate(schemas.changePassword), changePassword);
+// compatibility route for mobile expecting PUT /profile/change-password
+router.put('/change-password', auth, validate(schemas.changePassword), changePassword);
 
 module.exports = router;

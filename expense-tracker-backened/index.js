@@ -28,6 +28,16 @@ const rateLimiter    = require('./middleware/rateLimiter'); // limits OTP + auth
 const app  = express();
 const PORT = process.env.PORT || 5000;
 
+//-------------------------------------------------
+// Mandatory config validation (fail fast)
+//-------------------------------------------------
+['MONGO_URI','JWT_SECRET'].forEach((key) => {
+  if (!process.env[key]) {
+    console.error(`❌ Missing required environment variable: ${key}`);
+    process.exit(1);
+  }
+});
+
 // Function to get local IP address
 function getLocalIP() {
   const interfaces = os.networkInterfaces();
@@ -43,7 +53,14 @@ function getLocalIP() {
 
 // --- security / sanity middlewares ---
 app.use(helmet());
-app.use(cors({ origin: process.env.CLIENT_ORIGIN || '*' }));
+app.use(cors({
+  origin: (origin, cb) => {
+    const allowed = (process.env.CLIENT_ORIGIN || '').split(',').filter(Boolean);
+    if (!origin || allowed.length === 0 || allowed.includes('*') || allowed.includes(origin)) return cb(null, true);
+    return cb(new Error('CORS not allowed'), false);
+  },
+  credentials: true,
+}));
 app.use(express.json());
 
 // --- Swagger docs ---
@@ -76,11 +93,12 @@ app.use(errorHandler);
 //-------------------------------------------------
 // Mongo connection & server start
 //-------------------------------------------------
+let server;
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
     console.log('🗄️  MongoDB connected');
-    app.listen(PORT, '0.0.0.0', () => {
+    server = app.listen(PORT, '0.0.0.0', () => {
       const localIP = getLocalIP();
       console.log(`🚀  API server on http://localhost:${PORT}`);
       console.log(`🌐  Network access: http://${localIP}:${PORT}`);
@@ -92,5 +110,22 @@ mongoose
     process.exit(1);
   });
 
-// Export app for Jest / Supertest if you need it
+async function gracefulShutdown(signal) {
+  console.log(`\n⏻ Received ${signal}. Shutting down gracefully...`);
+  try {
+    if (server) {
+      await new Promise((resolve) => server.close(resolve));
+      console.log('✅ HTTP server closed');
+    }
+    await mongoose.connection.close();
+    console.log('✅ Mongo connection closed');
+    process.exit(0);
+  } catch (err) {
+    console.error('⚠️ Error during shutdown', err);
+    process.exit(1);
+  }
+}
+['SIGINT','SIGTERM'].forEach(sig => process.on(sig, () => gracefulShutdown(sig)));
+
+// Export for testing
 module.exports = app;

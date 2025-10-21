@@ -21,11 +21,12 @@ export default function Dashboard() {
   const [filters] = useState({ category:'', startDate:'', endDate:'' });
   const [showForm, setShowForm] = useState('income');
 
-  const permissions = JSON.parse(localStorage.getItem('permissions') || '{}');
+  const permissions = JSON.parse(localStorage.getItem('permissions') || sessionStorage.getItem('permissions') || '{}');
 
   /* ---------------- fetch helpers ---------------- */
   const handleUnauthorized = () => {
-    localStorage.removeItem('token');
+    localStorage.clear();
+    sessionStorage.clear();
     window.location.href = '/login';
   };
 
