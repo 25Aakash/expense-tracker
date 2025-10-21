@@ -397,50 +397,7 @@ const DashboardScreen = ({ navigation, route }) => {
           </LinearGradient>
         </Animated.View>
 
-        {/* Method Balance Cards */}
-        <View style={styles.methodsContainer}>
-          <LinearGradient
-            colors={['#ffffff', '#f8fafc']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.methodCard}
-          >
-            <View style={styles.methodHeader}>
-              <Ionicons name="wallet-outline" size={24} color="#10b981" />
-              <Text style={styles.methodTitle}>Cash</Text>
-            </View>
-            <Text style={styles.methodAmount}>
-              {formatCurrency(stats.cashBalance)}
-            </Text>
-            <TouchableOpacity 
-              style={styles.methodButton}
-              onPress={() => navigation.navigate('Transactions', { screen: 'CashTransactions' })}
-            >
-              <Text style={styles.methodButtonText}>View Details</Text>
-            </TouchableOpacity>
-          </LinearGradient>
-
-          <LinearGradient
-            colors={['#ffffff', '#f8fafc']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.methodCard}
-          >
-            <View style={styles.methodHeader}>
-              <Ionicons name="card-outline" size={24} color="#6366f1" />
-              <Text style={styles.methodTitle}>Bank</Text>
-            </View>
-            <Text style={styles.methodAmount}>
-              {formatCurrency(stats.bankBalance)}
-            </Text>
-            <TouchableOpacity 
-              style={styles.methodButton}
-              onPress={() => navigation.navigate('Transactions', { screen: 'BankTransactions' })}
-            >
-              <Text style={styles.methodButtonText}>View Details</Text>
-            </TouchableOpacity>
-          </LinearGradient>
-        </View>
+  {/* Method Balance Cards removed as per user request */}
 
         {/* Monthly Overview */}
         <Surface style={styles.monthlyCard} elevation={2}>
@@ -483,7 +440,7 @@ const DashboardScreen = ({ navigation, route }) => {
             {/* Top Row - Add Actions (always available for basic functionality) */}
             <View style={styles.actionsRow}>
               <TouchableOpacity
-                onPress={() => navigation.navigate('Transactions', { screen: 'AddExpense' })}
+                onPress={() => navigation.navigate('AddExpense')}
                 style={styles.actionWrapper}
               >
                 <LinearGradient
@@ -500,7 +457,7 @@ const DashboardScreen = ({ navigation, route }) => {
               </TouchableOpacity>
 
               <TouchableOpacity
-                onPress={() => navigation.navigate('Transactions', { screen: 'AddIncome' })}
+                onPress={() => navigation.navigate('AddIncome')}
                 style={styles.actionWrapper}
               >
                 <LinearGradient

@@ -6,7 +6,8 @@ const API = axios.create({
 });
 
 API.interceptors.request.use(cfg => {
-  const token = localStorage.getItem('token');
+  // Check both localStorage and sessionStorage for token
+  const token = localStorage.getItem('token') || sessionStorage.getItem('token');
   if (token) cfg.headers.Authorization = `Bearer ${token}`;
   return cfg;
 });
@@ -15,7 +16,9 @@ API.interceptors.response.use(
   res => res,
   err => {
     if (err.response?.status === 401) {
+      // Clear both localStorage and sessionStorage
       localStorage.clear();
+      sessionStorage.clear();
       toast.error('Session expired, please log in again.');
       window.location.href = '/login';
     }

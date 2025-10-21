@@ -5,7 +5,7 @@ import safeParse from './safeParse';
  * localStorage is empty or corrupted.
  */
 export function getPerms() {
-  const raw = safeParse(localStorage.getItem('permissions'));
+  const raw = safeParse(localStorage.getItem('permissions') || sessionStorage.getItem('permissions'));
 
   return {
     canAdd:           !!raw.canAdd,

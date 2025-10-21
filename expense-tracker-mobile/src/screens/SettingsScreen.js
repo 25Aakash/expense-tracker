@@ -145,7 +145,7 @@ const SettingsScreen = ({ navigation }) => {
   };
 
   const handleContactSupport = () => {
-    Linking.openURL('mailto:support@expensetracker-pro.com?subject=Support Request');
+  Linking.openURL('mailto:support@dailykhata.com?subject=Support Request');
   };
 
   const handlePrivacyPolicy = () => {

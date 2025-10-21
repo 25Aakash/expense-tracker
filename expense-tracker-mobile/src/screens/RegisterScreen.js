@@ -162,10 +162,16 @@ const RegisterScreen = ({ navigation }) => {
                   }
                 ]}
               >
-                <View style={styles.logoCircle}>
-                  <Ionicons name="wallet" size={40} color="#3b82f6" />
-                </View>
-                <Text style={styles.appName}>Expense Tracker</Text>
+                <LinearGradient
+                  colors={['#3b82f6', '#1d4ed8', '#1e40af']}
+                  style={styles.logoCircle}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                >
+                  <Ionicons name="wallet" size={48} color="white" />
+                </LinearGradient>
+                <Text style={styles.appName}>ExpenseTracker</Text>
+                <Text style={styles.tagline}>Smart Expense Management</Text>
               </Animated.View>
 
               {/* Animated Header */}
@@ -178,9 +184,9 @@ const RegisterScreen = ({ navigation }) => {
                   }
                 ]}
               >
-                <Text style={styles.title}>Create Account</Text>
+                <Text style={styles.title}>Create Your Account</Text>
                 <Text style={styles.subtitle}>
-                  Join us to start tracking your expenses
+                  Start your financial journey with us today
                 </Text>
               </Animated.View>
 
@@ -199,8 +205,8 @@ const RegisterScreen = ({ navigation }) => {
                     <View style={styles.inputContainer}>
                       <Ionicons 
                         name="person-outline" 
-                        size={20} 
-                        color="#3b82f6" 
+                        size={22} 
+                        color="#667eea" 
                         style={styles.inputIcon}
                       />
                       <TextInput
@@ -211,6 +217,12 @@ const RegisterScreen = ({ navigation }) => {
                         autoCapitalize="words"
                         style={styles.input}
                         disabled={loading}
+                        theme={{
+                          colors: {
+                            primary: '#667eea',
+                            outline: '#d1d5db',
+                          }
+                        }}
                       />
                     </View>
 
@@ -218,8 +230,8 @@ const RegisterScreen = ({ navigation }) => {
                     <View style={styles.inputContainer}>
                       <Ionicons 
                         name="mail-outline" 
-                        size={20} 
-                        color="#3b82f6" 
+                        size={22} 
+                        color="#667eea" 
                         style={styles.inputIcon}
                       />
                       <TextInput
@@ -232,6 +244,12 @@ const RegisterScreen = ({ navigation }) => {
                         autoCorrect={false}
                         style={styles.input}
                         disabled={loading}
+                        theme={{
+                          colors: {
+                            primary: '#667eea',
+                            outline: '#d1d5db',
+                          }
+                        }}
                       />
                     </View>
 
@@ -239,8 +257,8 @@ const RegisterScreen = ({ navigation }) => {
                     <View style={styles.inputContainer}>
                       <Ionicons 
                         name="call-outline" 
-                        size={20} 
-                        color="#3b82f6" 
+                        size={22} 
+                        color="#667eea" 
                         style={styles.inputIcon}
                       />
                       <TextInput
@@ -253,6 +271,12 @@ const RegisterScreen = ({ navigation }) => {
                         maxLength={10}
                         style={styles.input}
                         disabled={loading}
+                        theme={{
+                          colors: {
+                            primary: '#667eea',
+                            outline: '#d1d5db',
+                          }
+                        }}
                       />
                     </View>
 
@@ -260,8 +284,8 @@ const RegisterScreen = ({ navigation }) => {
                     <View style={styles.inputContainer}>
                       <Ionicons 
                         name="lock-closed-outline" 
-                        size={20} 
-                        color="#3b82f6" 
+                        size={22} 
+                        color="#667eea" 
                         style={styles.inputIcon}
                       />
                       <TextInput
@@ -274,10 +298,17 @@ const RegisterScreen = ({ navigation }) => {
                           <TextInput.Icon
                             icon={showPassword ? 'eye-off' : 'eye'}
                             onPress={() => setShowPassword(!showPassword)}
+                            iconColor="#667eea"
                           />
                         }
                         style={styles.input}
                         disabled={loading}
+                        theme={{
+                          colors: {
+                            primary: '#667eea',
+                            outline: '#d1d5db',
+                          }
+                        }}
                       />
                     </View>
 
@@ -285,8 +316,8 @@ const RegisterScreen = ({ navigation }) => {
                     <View style={styles.inputContainer}>
                       <Ionicons 
                         name="lock-closed-outline" 
-                        size={20} 
-                        color="#3b82f6" 
+                        size={22} 
+                        color="#667eea" 
                         style={styles.inputIcon}
                       />
                       <TextInput
@@ -299,10 +330,17 @@ const RegisterScreen = ({ navigation }) => {
                           <TextInput.Icon
                             icon={showConfirmPassword ? 'eye-off' : 'eye'}
                             onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                            iconColor="#667eea"
                           />
                         }
                         style={styles.input}
                         disabled={loading}
+                        theme={{
+                          colors: {
+                            primary: '#667eea',
+                            outline: '#d1d5db',
+                          }
+                        }}
                       />
                     </View>
 
@@ -310,23 +348,28 @@ const RegisterScreen = ({ navigation }) => {
                     <TouchableOpacity
                       onPress={handleRegister}
                       disabled={loading}
-                      style={styles.registerButton}
+                      activeOpacity={0.8}
                     >
                       <LinearGradient
-                        colors={['#3b82f6', '#1d4ed8']}
+                        colors={['#3b82f6', '#1d4ed8', '#1e40af']}
                         style={styles.registerButton}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 0 }}
                       >
                         {loading ? (
-                          <ActivityIndicator color="white" />
+                          <View style={styles.loadingContainer}>
+                            <ActivityIndicator color="white" size="small" />
+                            <Text style={[styles.buttonText, { marginLeft: 8 }]}>Creating Account...</Text>
+                          </View>
                         ) : (
-                          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                          <View style={styles.buttonContent}>
                             <Ionicons 
-                              name="person-add-outline" 
-                              size={20} 
+                              name="rocket-outline" 
+                              size={22} 
                               color="white" 
                               style={styles.buttonIcon}
                             />
-                            <Text style={styles.buttonText}>Create Account</Text>
+                            <Text style={styles.buttonText}>Get Started</Text>
                           </View>
                         )}
                       </LinearGradient>
@@ -370,122 +413,150 @@ const styles = StyleSheet.create({
   },
   logoContainer: {
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: 36,
   },
   logoCircle: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: 'white',
+    width: 110,
+    height: 110,
+    borderRadius: 55,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 16,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 4,
+      height: 8,
     },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 8,
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    elevation: 10,
   },
   appName: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
     color: 'white',
     textShadowColor: 'rgba(0, 0, 0, 0.3)',
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 4,
+    letterSpacing: 1,
+    marginBottom: 4,
+  },
+  tagline: {
+    fontSize: 14,
+    color: 'rgba(255, 255, 255, 0.8)',
+    textAlign: 'center',
+    fontStyle: 'italic',
+    textShadowColor: 'rgba(0, 0, 0, 0.2)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   header: {
     alignItems: 'center',
-    marginBottom: 32,
+    marginBottom: 28,
   },
   title: {
-    fontSize: 32,
+    fontSize: 30,
     fontWeight: 'bold',
     color: 'white',
-    marginBottom: 8,
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 4,
+    marginBottom: 12,
+    textShadowColor: 'rgba(0, 0, 0, 0.4)',
+    textShadowOffset: { width: 0, height: 3 },
+    textShadowRadius: 6,
+    letterSpacing: 0.5,
+    textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
     color: 'rgba(255, 255, 255, 0.9)',
     textAlign: 'center',
-    textShadowColor: 'rgba(0, 0, 0, 0.2)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
+    lineHeight: 22,
+    paddingHorizontal: 20,
   },
   card: {
-    backgroundColor: 'white',
-    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderRadius: 25,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 4,
+      height: 8,
     },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 6,
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
   },
   cardContent: {
-    padding: 24,
+    padding: 28,
   },
   inputContainer: {
     position: 'relative',
-    marginBottom: 20,
+    marginBottom: 18,
   },
   inputIcon: {
     position: 'absolute',
-    top: 28,
-    left: 12,
+    top: 30,
+    left: 14,
     zIndex: 1,
   },
   input: {
-    backgroundColor: 'white',
-    paddingLeft: 40,
+    backgroundColor: 'rgba(248, 250, 252, 0.8)',
+    paddingLeft: 45,
+    fontSize: 16,
   },
   registerButton: {
-    borderRadius: 25,
+    borderRadius: 30,
     paddingVertical: 4,
-    marginTop: 8,
+    marginTop: 12,
     marginBottom: 24,
     shadowColor: '#3b82f6',
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 4,
     },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 3,
-    flexDirection: 'row',
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+    height: 56,
     justifyContent: 'center',
     alignItems: 'center',
-    height: 50,
+  },
+  buttonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loadingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   buttonIcon: {
-    marginRight: 8,
+    marginRight: 10,
   },
   buttonText: {
     color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 18,
+    fontWeight: '700',
+    letterSpacing: 0.5,
   },
   loginContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
+    paddingTop: 8,
   },
   loginText: {
-    fontSize: 14,
+    fontSize: 15,
     color: '#6b7280',
   },
   loginLink: {
-    fontSize: 14,
-    color: '#3b82f6',
-    fontWeight: '600',
+    fontSize: 15,
+    color: '#667eea',
+    fontWeight: '700',
   },
 });
 

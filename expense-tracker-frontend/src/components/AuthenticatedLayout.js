@@ -13,7 +13,7 @@ function AuthenticatedLayout() {
   }, []);
 
   // Run return AFTER all hooks
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('token') || sessionStorage.getItem('token');
   if (!token) return <Navigate to="/login" replace />;
 
   return (

@@ -1,15 +1,12 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_BASE_URL } from '../config';
 
-// Replace this with your actual backend URL
-// For Expo development, use your computer's IP address
-const BASE_URL = 'http://192.168.29.205:5000/api';  // Updated IP for mobile hotspot
-
-console.log('API Base URL:', BASE_URL); // Debug log
+console.log('API Base URL:', API_BASE_URL); // Debug log
 
 // Create axios instance
 const api = axios.create({
-  baseURL: BASE_URL,
+  baseURL: API_BASE_URL,
   timeout: 15000, // Increased timeout to 15 seconds
   headers: {
     'Content-Type': 'application/json',
@@ -50,9 +47,12 @@ export const authAPI = {
   registerRequest: (userData) => api.post('/auth/register-request', userData),
   verifyOtp: (email, otp) => api.post('/auth/verify-otp', { email, otp }),
   resendOtp: (email) => api.post('/auth/resend-otp', { email }),
-  logout: () => api.post('/auth/logout'),
+  logout: () => api.post('/auth/logout'), // stateless
   verifyToken: () => api.get('/auth/verify'),
-  getCurrentUser: () => api.get('/profile'), // Returns latest user info and permissions
+  getCurrentUser: () => api.get('/profile'),
+  requestReset: (email) => api.post('/auth/request-reset', { email }),
+  confirmReset: (email, otp, newPassword) => api.post('/auth/confirm-reset', { email, otp, newPassword }),
+  changePassword: (currentPassword, newPassword) => api.post('/auth/change-password', { currentPassword, newPassword }),
 };
 
 // Expense API calls
@@ -77,7 +77,6 @@ export const incomeAPI = {
 export const profileAPI = {
   get: () => api.get('/profile'),
   update: (data) => api.put('/profile', data),
-  changePassword: (data) => api.put('/profile/change-password', data),
 };
 
 // Categories API calls
