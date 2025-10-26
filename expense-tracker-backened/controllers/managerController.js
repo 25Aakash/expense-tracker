@@ -2,7 +2,6 @@
 const User    = require('../models/User');
 const Income  = require('../models/Income');
 const Expense = require('../models/Expense');
-const bcrypt  = require('bcryptjs');
 
 /* ───────── helpers ───────── */
 const isManaged = (mgrId, user) => user && String(user.managerId) === String(mgrId);
@@ -52,10 +51,10 @@ exports.addUserUnderManager = async (req, res) => {
   if (await User.exists({ email })) {
     return res.status(400).json({ error: 'Email already exists' });
   }
-  const hashed = await bcrypt.hash(password, 10);
+  // Don't manually hash - the User model's pre-save hook will handle it
   await User.create({
     name, email, mobile,
-    password : hashed,
+    password,  // Pass plain password - will be hashed by pre-save hook
     role     : 'user',
     managerId: req.user.id,
     isVerified: true,

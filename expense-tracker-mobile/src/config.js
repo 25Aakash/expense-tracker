@@ -31,16 +31,19 @@ function platformDefault() {
 }
 
 function resolveBaseUrl() {
-  // 1. Explicit env
+  // 1. Explicit env (now set in app.config.js)
   const envUrl = process.env.EXPO_PUBLIC_API_URL;
   if (envUrl) return sanitize(envUrl);
 
-  // 2. Try to derive from Expo host (LAN / tunnel)
-  const expoDerived = deriveFromExpoHost();
-  if (expoDerived) return expoDerived;
+  // 2. Fallback to production URL
+  return 'https://expense-tracker-hirq.onrender.com/api';
 
-  // 3. Platform default mapping
-  return platformDefault();
+  // 3. Try to derive from Expo host (LAN / tunnel) - only for development
+  // const expoDerived = deriveFromExpoHost();
+  // if (expoDerived) return expoDerived;
+
+  // 4. Platform default mapping - only for local development
+  // return platformDefault();
 }
 
 export const API_BASE_URL = resolveBaseUrl();
