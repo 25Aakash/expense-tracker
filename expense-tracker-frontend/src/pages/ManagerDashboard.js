@@ -19,6 +19,7 @@ const PERMS = [
 export default function ManagerDashboard() {
   const [users, setUsers] = useState([]);
   const [show, setShow] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const { t } = useTranslation();
   const [form, setForm] = useState({
     name: '', email: '', mobile: '', password: '',
@@ -47,6 +48,7 @@ export default function ManagerDashboard() {
         permissions: Object.fromEntries(PERMS.map(k => [k, false]))
       });
       setShow(false);
+      setShowPassword(false);
       load();
     } catch (err) {
       toast.error(err.response?.data?.error || t('toast.addFailed'));
@@ -142,10 +144,10 @@ export default function ManagerDashboard() {
               </div>
               <div className="modal-body">
                 <form onSubmit={add} className="row g-3">
-                  {['name','email','mobile','password'].map(f => (
+                  {['name','email','mobile'].map(f => (
                     <div className="col-6" key={f}>
                       <input
-                        type={f === 'password' ? 'password' : 'text'}
+                        type="text"
                         required
                         className="form-control"
                         placeholder={t(`form.${f}`)}
@@ -154,6 +156,28 @@ export default function ManagerDashboard() {
                       />
                     </div>
                   ))}
+
+                  {/* Password field with show/hide toggle */}
+                  <div className="col-6">
+                    <div className="position-relative">
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        required
+                        className="form-control"
+                        placeholder={t('form.password')}
+                        value={form.password}
+                        onChange={e => setForm({ ...form, password: e.target.value })}
+                      />
+                      <span
+                        role="button"
+                        className="position-absolute top-50 end-0 translate-middle-y pe-3 text-muted"
+                        onClick={() => setShowPassword(!showPassword)}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        <i className={`bi bi-eye${showPassword ? '-slash' : ''}`}></i>
+                      </span>
+                    </div>
+                  </div>
 
                   <div className="col-12">
                     <label className="form-label">{t('permissions')}</label>

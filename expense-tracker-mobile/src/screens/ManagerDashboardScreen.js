@@ -59,6 +59,7 @@ const ManagerDashboardScreen = () => {
   const [viewMode, setViewMode] = useState('grid');
   const [selectedMemberDetails, setSelectedMemberDetails] = useState(null);
   const [showMemberDetails, setShowMemberDetails] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
   const [formData, setFormData] = useState({
@@ -204,6 +205,7 @@ const ManagerDashboardScreen = () => {
       password: '',
       permissions: Object.fromEntries(PERMISSIONS.map(p => [p.key, false]))
     });
+    setShowPassword(false);
     setShowAddDialog(false);
   };
 
@@ -730,8 +732,14 @@ const ManagerDashboardScreen = () => {
                   onChangeText={(text) => setFormData({ ...formData, password: text })}
                   style={styles.input}
                   mode="outlined"
-                  secureTextEntry
+                  secureTextEntry={!showPassword}
                   left={<TextInput.Icon icon="lock" />}
+                  right={
+                    <TextInput.Icon
+                      icon={showPassword ? 'eye-off' : 'eye'}
+                      onPress={() => setShowPassword(!showPassword)}
+                    />
+                  }
                 />
               </Surface>
 
