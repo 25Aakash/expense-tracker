@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   StyleSheet,
@@ -22,22 +22,71 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as LocalAuthentication from 'expo-local-authentication';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 const SettingsScreen = ({ navigation }) => {
   const { user, logout } = useAuth();
+  const { theme, isDarkMode, toggleTheme } = useTheme();
+  const styles = createStyles(theme);
   
   // Settings state
   const [notifications, setNotifications] = useState(true);
   const [biometric, setBiometric] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
   const [currency, setCurrency] = useState('INR');
   const [language, setLanguage] = useState('English');
+  const [biometricAvailable, setBiometricAvailable] = useState(false);
+  const [biometricType, setBiometricType] = useState('');
   
   // Dialog states
   const [showCurrencyDialog, setShowCurrencyDialog] = useState(false);
   const [showLanguageDialog, setShowLanguageDialog] = useState(false);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
+
+  // Check biometric availability
+  useEffect(() => {
+    checkBiometricAvailability();
+    loadSettings();
+  }, []);
+
+  const checkBiometricAvailability = async () => {
+    try {
+      const compatible = await LocalAuthentication.hasHardwareAsync();
+      const enrolled = await LocalAuthentication.isEnrolledAsync();
+      const types = await LocalAuthentication.supportedAuthenticationTypesAsync();
+      
+      setBiometricAvailable(compatible && enrolled);
+      
+      if (types.includes(LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION)) {
+        setBiometricType('Face ID');
+      } else if (types.includes(LocalAuthentication.AuthenticationType.FINGERPRINT)) {
+        setBiometricType('Fingerprint');
+      } else if (types.includes(LocalAuthentication.AuthenticationType.IRIS)) {
+        setBiometricType('Iris');
+      }
+    } catch (error) {
+      console.error('Error checking biometric availability:', error);
+    }
+  };
+
+  const loadSettings = async () => {
+    try {
+      const savedBiometric = await AsyncStorage.getItem('setting_biometric');
+      const savedDarkMode = await AsyncStorage.getItem('setting_darkMode');
+      const savedNotifications = await AsyncStorage.getItem('setting_notifications');
+      const savedCurrency = await AsyncStorage.getItem('setting_currency');
+      const savedLanguage = await AsyncStorage.getItem('setting_language');
+      
+      if (savedBiometric !== null) setBiometric(JSON.parse(savedBiometric));
+      if (savedDarkMode !== null) setDarkMode(JSON.parse(savedDarkMode));
+      if (savedNotifications !== null) setNotifications(JSON.parse(savedNotifications));
+      if (savedCurrency !== null) setCurrency(JSON.parse(savedCurrency));
+      if (savedLanguage !== null) setLanguage(JSON.parse(savedLanguage));
+    } catch (error) {
+      console.error('Error loading settings:', error);
+    }
+  };
 
   const currencies = [
     { label: 'Indian Rupee (₹)', value: 'INR' },
@@ -66,24 +115,54 @@ const SettingsScreen = ({ navigation }) => {
     handleSaveSetting('notifications', value);
   };
 
-  const handleBiometricToggle = (value) => {
-    setBiometric(value);
-    handleSaveSetting('biometric', value);
-    if (value) {
+  const handleBiometricToggle = async (value) => {
+    if (!biometricAvailable) {
       Alert.alert(
-        'Biometric Authentication',
-        'Biometric authentication will be available in the next update.',
+        'Biometric Not Available',
+        'Your device does not support biometric authentication or it has not been set up.',
+        [{ text: 'OK' }]
+      );
+      return;
+    }
+
+    if (value) {
+      // Authenticate before enabling
+      const result = await LocalAuthentication.authenticateAsync({
+        promptMessage: 'Authenticate to enable biometric login',
+        fallbackLabel: 'Use passcode',
+      });
+
+      if (result.success) {
+        setBiometric(true);
+        handleSaveSetting('biometric', true);
+        Alert.alert(
+          'Success',
+          `${biometricType} authentication has been enabled for quick login.`,
+          [{ text: 'OK' }]
+        );
+      } else {
+        Alert.alert(
+          'Authentication Failed',
+          'Unable to verify your identity. Biometric authentication was not enabled.',
+          [{ text: 'OK' }]
+        );
+      }
+    } else {
+      setBiometric(false);
+      handleSaveSetting('biometric', false);
+      Alert.alert(
+        'Disabled',
+        'Biometric authentication has been disabled.',
         [{ text: 'OK' }]
       );
     }
   };
 
-  const handleDarkModeToggle = (value) => {
-    setDarkMode(value);
-    handleSaveSetting('darkMode', value);
+  const handleDarkModeToggle = () => {
+    toggleTheme();
     Alert.alert(
-      'Dark Mode',
-      'Dark mode will be available in the next update.',
+      isDarkMode ? 'Light Mode Activated' : 'Dark Mode Activated',
+      `The app has switched to ${!isDarkMode ? 'dark' : 'light'} mode.`,
       [{ text: 'OK' }]
     );
   };
@@ -216,12 +295,17 @@ const SettingsScreen = ({ navigation }) => {
             
             <List.Item
               title="Biometric Authentication"
-              description="Use fingerprint or face ID to unlock"
+              description={
+                biometricAvailable 
+                  ? `Use ${biometricType} to unlock` 
+                  : 'Not available on this device'
+              }
               left={(props) => <List.Icon {...props} icon="fingerprint" />}
               right={() => (
                 <Switch
                   value={biometric}
                   onValueChange={handleBiometricToggle}
+                  disabled={!biometricAvailable}
                 />
               )}
             />
@@ -233,7 +317,7 @@ const SettingsScreen = ({ navigation }) => {
               left={(props) => <List.Icon {...props} icon="theme-light-dark" />}
               right={() => (
                 <Switch
-                  value={darkMode}
+                  value={isDarkMode}
                   onValueChange={handleDarkModeToggle}
                 />
               )}
@@ -431,10 +515,10 @@ const SettingsScreen = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (theme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8fafc',
+    backgroundColor: theme.background,
   },
   gradient: {
     flex: 1,
@@ -444,9 +528,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 16,
-    backgroundColor: 'white',
+    backgroundColor: theme.card,
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
+    borderBottomColor: theme.border,
   },
   backButton: {
     padding: 8,
@@ -455,7 +539,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#1f2937',
+    color: theme.text,
     marginLeft: 16,
   },
   headerSpacer: {
@@ -468,13 +552,13 @@ const styles = StyleSheet.create({
     margin: 16,
     marginBottom: 8,
     borderRadius: 12,
-    backgroundColor: 'white',
+    backgroundColor: theme.card,
     paddingVertical: 8,
   },
   sectionTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#1f2937',
+    color: theme.text,
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
@@ -487,7 +571,7 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: '#6366f1',
+    backgroundColor: theme.primary,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 16,
@@ -503,16 +587,16 @@ const styles = StyleSheet.create({
   userName: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#1f2937',
+    color: theme.text,
   },
   userEmail: {
     fontSize: 14,
-    color: '#6b7280',
+    color: theme.textSecondary,
     marginTop: 2,
   },
   userRole: {
     fontSize: 12,
-    color: '#6366f1',
+    color: theme.primary,
     fontWeight: '600',
     marginTop: 4,
     textTransform: 'uppercase',
@@ -526,7 +610,7 @@ const styles = StyleSheet.create({
   },
   radioLabel: {
     fontSize: 16,
-    color: '#1f2937',
+    color: theme.text,
     marginLeft: 8,
   },
   bottomSpacing: {
