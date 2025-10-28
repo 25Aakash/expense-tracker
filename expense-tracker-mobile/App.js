@@ -19,6 +19,7 @@ import AddIncomeScreen from './src/screens/AddIncomeScreen';
 
 // Import context providers and components
 import { AuthProvider } from './src/context/AuthContext';
+import { ThemeProvider } from './src/context/ThemeContext';
 import ErrorBoundary from './src/components/ErrorBoundary';
 
 const Stack = createNativeStackNavigator();
@@ -42,66 +43,68 @@ const theme = {
 export default function App() {
   return (
     <ErrorBoundary>
-      <PaperProvider theme={theme}>
-        <AuthProvider>
-          <NavigationContainer>
-            <StatusBar style="auto" />
-            <Stack.Navigator 
-              initialRouteName="Onboarding"
-              screenOptions={{
-                headerStyle: {
-                  backgroundColor: theme.colors.primary,
-                },
-                headerTintColor: theme.colors.onPrimary,
-                headerTitleStyle: {
-                  fontWeight: 'bold',
-                },
-              }}
-            >
-              <Stack.Screen 
-                name="Onboarding" 
-                component={OnboardingScreen} 
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen 
-                name="Login" 
-                component={LoginScreen} 
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen 
-                name="Register" 
-                component={RegisterScreen}
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen 
-                name="OTPVerification" 
-                component={OTPVerificationScreen}
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen 
-                name="Main" 
-                component={MainTabNavigator}
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen 
-                name="AddExpense" 
-                component={AddExpenseScreen}
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen 
-                name="AddIncome" 
-                component={AddIncomeScreen}
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen 
-                name="ResetPassword" 
-                component={ResetPasswordScreen}
-                options={{ headerShown: false }}
-              />
-            </Stack.Navigator>
-          </NavigationContainer>
-        </AuthProvider>
-      </PaperProvider>
+      <ThemeProvider>
+        <PaperProvider theme={theme}>
+          <AuthProvider>
+            <NavigationContainer>
+              <StatusBar style="auto" />
+              <Stack.Navigator 
+                initialRouteName="Onboarding"
+                screenOptions={{
+                  headerStyle: {
+                    backgroundColor: theme.colors.primary,
+                  },
+                  headerTintColor: theme.colors.onPrimary,
+                  headerTitleStyle: {
+                    fontWeight: 'bold',
+                  },
+                }}
+              >
+                <Stack.Screen 
+                  name="Onboarding" 
+                  component={OnboardingScreen} 
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen 
+                  name="Login" 
+                  component={LoginScreen} 
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen 
+                  name="Register" 
+                  component={RegisterScreen}
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen 
+                  name="OTPVerification" 
+                  component={OTPVerificationScreen}
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen 
+                  name="Main" 
+                  component={MainTabNavigator}
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen 
+                  name="AddExpense" 
+                  component={AddExpenseScreen}
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen 
+                  name="AddIncome" 
+                  component={AddIncomeScreen}
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen 
+                  name="ResetPassword" 
+                  component={ResetPasswordScreen}
+                  options={{ headerShown: false }}
+                />
+              </Stack.Navigator>
+            </NavigationContainer>
+          </AuthProvider>
+        </PaperProvider>
+      </ThemeProvider>
     </ErrorBoundary>
   );
 }

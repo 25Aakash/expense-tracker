@@ -430,6 +430,35 @@ const ManagerDashboardScreen = () => {
             </TouchableOpacity>
           </View>
 
+          {/* Search and View Toggle */}
+          <View style={styles.controlsContainer}>
+            <Searchbar
+              placeholder="Search team members..."
+              onChangeText={setSearchQuery}
+              value={searchQuery}
+              style={styles.searchBar}
+              icon={() => <Ionicons name="search" size={20} color="#6b7280" />}
+              clearIcon={() => <Ionicons name="close" size={20} color="#6b7280" />}
+            />
+            <SegmentedButtons
+              value={viewMode}
+              onValueChange={setViewMode}
+              buttons={[
+                {
+                  value: 'list',
+                  label: 'List',
+                  icon: 'format-list-bulleted',
+                },
+                {
+                  value: 'grid',
+                  label: 'Grid',
+                  icon: 'grid',
+                },
+              ]}
+              style={styles.viewToggle}
+            />
+          </View>
+
           {/* Stats Cards */}
           <View style={styles.statsContainer}>
             <View style={styles.statsGrid}>
@@ -489,35 +518,6 @@ const ManagerDashboardScreen = () => {
                 </LinearGradient>
               </Surface>
             </View>
-          </View>
-
-          {/* Search and View Toggle */}
-          <View style={styles.controlsContainer}>
-            <Searchbar
-              placeholder="Search team members..."
-              onChangeText={setSearchQuery}
-              value={searchQuery}
-              style={styles.searchBar}
-              icon={() => <Ionicons name="search" size={20} color="#6b7280" />}
-              clearIcon={() => <Ionicons name="close" size={20} color="#6b7280" />}
-            />
-            <SegmentedButtons
-              value={viewMode}
-              onValueChange={setViewMode}
-              buttons={[
-                {
-                  value: 'list',
-                  label: 'List',
-                  icon: 'format-list-bulleted',
-                },
-                {
-                  value: 'grid',
-                  label: 'Grid',
-                  icon: 'grid',
-                },
-              ]}
-              style={styles.viewToggle}
-            />
           </View>
 
           {/* Team Members */}
@@ -850,78 +850,93 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingTop: 8,
-    paddingBottom: 12,
+    paddingTop: 12,
+    paddingBottom: 16,
   },
   headerTitle: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
     color: '#1f2937',
+    letterSpacing: 0.5,
   },
   headerSubtitle: {
     fontSize: 14,
     color: '#6b7280',
-    marginTop: 2,
+    marginTop: 4,
   },
   headerAction: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     backgroundColor: '#f0f0ff',
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: '#6366f1',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+
+  // Controls (moved above stats)
+  controlsContainer: {
+    paddingHorizontal: 20,
+    paddingVertical: 8,
+    paddingBottom: 16,
+    gap: 12,
+  },
+  searchBar: {
+    elevation: 2,
+    borderRadius: 12,
+    backgroundColor: '#fff',
+  },
+  viewToggle: {
+    borderRadius: 10,
+    backgroundColor: '#fff',
   },
 
   // Stats
   statsContainer: {
     paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingBottom: 16,
   },
   statsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    gap: 12,
+    gap: 14,
   },
   statCard: {
-    width: (screenWidth - 64) / 2, // Account for padding and gap
-    borderRadius: 16,
-    height: 100,
+    width: (screenWidth - 68) / 2, // Account for padding and gap
+    borderRadius: 18,
+    height: 110,
   },
   statCardGradient: {
     flex: 1,
-    padding: 12,
-    borderRadius: 16,
+    padding: 14,
+    borderRadius: 18,
     justifyContent: 'space-between',
   },
   statIconContainer: {
     alignSelf: 'flex-end',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    padding: 8,
+    borderRadius: 10,
   },
   statLabel: {
     color: '#fff',
-    fontSize: 12,
-    opacity: 0.9,
-    fontWeight: '500',
+    fontSize: 13,
+    opacity: 0.95,
+    fontWeight: '600',
   },
   statValue: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
-  },
-
-  // Controls
-  controlsContainer: {
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    gap: 12,
-  },
-  searchBar: {
-    elevation: 1,
-    borderRadius: 12,
-    backgroundColor: '#fff',
-  },
-  viewToggle: {
-    borderRadius: 8,
+    letterSpacing: 0.5,
   },
 
   // Section
