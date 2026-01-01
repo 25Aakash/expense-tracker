@@ -27,10 +27,6 @@
       "buildNumber": "1",
       "config": {
         "usesNonExemptEncryption": false
-      },
-      "infoPlist": {
-        "NSCameraUsageDescription": "This app uses camera to scan receipts for expense tracking",
-        "NSPhotoLibraryUsageDescription": "This app needs access to photo library to attach receipt images"
       }
     },
     "android": {
@@ -40,11 +36,7 @@
       },
       "package": "com.expensetracker.pro",
       "versionCode": 1,
-      "permissions": [
-        "CAMERA",
-        "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE"
-      ],
+      "permissions": [],
       "edgeToEdgeEnabled": true
     },
     "web": {
@@ -58,14 +50,17 @@
       "eas": {
         "projectId": "a878dfa8-9c1b-4119-8893-6b8c216ddfa2"
       },
-      "EXPO_PUBLIC_API_URL": "https://expense-tracker-hirq.onrender.com/api"
+      "supportEmail": "dailycashbook3@gmail.com",
+      "supportUrl": "https://github.com/25Aakash/dailycashbook",
+      "privacyPolicyUrl": "https://github.com/25Aakash/dailycashbook/blob/main/PRIVACY_POLICY.md",
+      "termsOfServiceUrl": "https://github.com/25Aakash/dailycashbook/blob/main/TERMS_OF_SERVICE.md"
     },
     "owner": "kaakash",
     "runtimeVersion": {
       "policy": "appVersion"
     },
     "updates": {
-      "url": "https://u.expo.dev/28630534-7fe0-49ea-ab8d-246e2037faaa"
+      "url": "https://u.expo.dev/a878dfa8-9c1b-4119-8893-6b8c216ddfa2"
     }
   }
 }

@@ -18,6 +18,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import AppUpdateService from '../services/AppUpdateService';
+import { theme } from '../utils/theme';
 
 const AboutScreen = ({ navigation }) => {
   const appInfo = AppUpdateService.getAppInfo();
@@ -27,7 +28,7 @@ const AboutScreen = ({ navigation }) => {
   };
 
   const handleContactSupport = () => {
-    Linking.openURL('mailto:support@expensetracker-pro.com?subject=Support Request');
+    Linking.openURL('mailto:dailycashbook3@gmail.com?subject=Support Request');
   };
 
   const handleRateApp = () => {
@@ -52,7 +53,7 @@ const AboutScreen = ({ navigation }) => {
                 <Ionicons name="calculator" size={40} color="#6366f1" />
               </View>
               <View style={styles.appDetails}>
-                <Text style={styles.appName}>ExpenseTracker Pro</Text>
+                <Text style={styles.appName}>DailyCashBook</Text>
                 <Text style={styles.appVersion}>Version {appInfo.version}</Text>
                 <Text style={styles.buildNumber}>Build {appInfo.buildNumber}</Text>
               </View>
@@ -131,7 +132,7 @@ const AboutScreen = ({ navigation }) => {
             
             <TouchableOpacity 
               style={styles.actionItem} 
-              onPress={() => openURL('https://expensetracker-pro.com/privacy')}
+              onPress={() => openURL('https://github.com/25Aakash/dailycashbook/blob/main/PRIVACY_POLICY.md')}
             >
               <View style={styles.actionLeft}>
                 <Ionicons name="document-text" size={20} color="#6b7280" />
@@ -142,7 +143,7 @@ const AboutScreen = ({ navigation }) => {
 
             <TouchableOpacity 
               style={styles.actionItem} 
-              onPress={() => openURL('https://expensetracker-pro.com/terms')}
+              onPress={() => openURL('https://github.com/25Aakash/dailycashbook/blob/main/TERMS_OF_SERVICE.md')}
             >
               <View style={styles.actionLeft}>
                 <Ionicons name="document-text" size={20} color="#6b7280" />
@@ -167,10 +168,10 @@ const AboutScreen = ({ navigation }) => {
           <Surface style={styles.section} elevation={1}>
             <Text style={styles.sectionTitle}>Developer</Text>
             <Text style={styles.developerText}>
-              ExpenseTracker Pro Team
+              DailyCashBook Team
             </Text>
             <Text style={styles.contactText}>
-              support@expensetracker-pro.com
+              dailycashbook3@gmail.com
             </Text>
           </Surface>
 

@@ -22,64 +22,33 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as LocalAuthentication from 'expo-local-authentication';
 import { useAuth } from '../context/AuthContext';
-import { useTheme } from '../context/ThemeContext';
+import { theme } from '../utils/theme';
 
 const SettingsScreen = ({ navigation }) => {
   const { user, logout } = useAuth();
-  const { theme, isDarkMode, toggleTheme } = useTheme();
   const styles = createStyles(theme);
   
   // Settings state
   const [notifications, setNotifications] = useState(true);
-  const [biometric, setBiometric] = useState(false);
   const [currency, setCurrency] = useState('INR');
   const [language, setLanguage] = useState('English');
-  const [biometricAvailable, setBiometricAvailable] = useState(false);
-  const [biometricType, setBiometricType] = useState('');
   
   // Dialog states
   const [showCurrencyDialog, setShowCurrencyDialog] = useState(false);
   const [showLanguageDialog, setShowLanguageDialog] = useState(false);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
-  // Check biometric availability
   useEffect(() => {
-    checkBiometricAvailability();
     loadSettings();
   }, []);
 
-  const checkBiometricAvailability = async () => {
-    try {
-      const compatible = await LocalAuthentication.hasHardwareAsync();
-      const enrolled = await LocalAuthentication.isEnrolledAsync();
-      const types = await LocalAuthentication.supportedAuthenticationTypesAsync();
-      
-      setBiometricAvailable(compatible && enrolled);
-      
-      if (types.includes(LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION)) {
-        setBiometricType('Face ID');
-      } else if (types.includes(LocalAuthentication.AuthenticationType.FINGERPRINT)) {
-        setBiometricType('Fingerprint');
-      } else if (types.includes(LocalAuthentication.AuthenticationType.IRIS)) {
-        setBiometricType('Iris');
-      }
-    } catch (error) {
-      console.error('Error checking biometric availability:', error);
-    }
-  };
-
   const loadSettings = async () => {
     try {
-      const savedBiometric = await AsyncStorage.getItem('setting_biometric');
-      const savedDarkMode = await AsyncStorage.getItem('setting_darkMode');
       const savedNotifications = await AsyncStorage.getItem('setting_notifications');
       const savedCurrency = await AsyncStorage.getItem('setting_currency');
       const savedLanguage = await AsyncStorage.getItem('setting_language');
       
-      if (savedBiometric !== null) setBiometric(JSON.parse(savedBiometric));
-      if (savedDarkMode !== null) setDarkMode(JSON.parse(savedDarkMode));
       if (savedNotifications !== null) setNotifications(JSON.parse(savedNotifications));
       if (savedCurrency !== null) setCurrency(JSON.parse(savedCurrency));
       if (savedLanguage !== null) setLanguage(JSON.parse(savedLanguage));
@@ -113,58 +82,6 @@ const SettingsScreen = ({ navigation }) => {
   const handleNotificationToggle = (value) => {
     setNotifications(value);
     handleSaveSetting('notifications', value);
-  };
-
-  const handleBiometricToggle = async (value) => {
-    if (!biometricAvailable) {
-      Alert.alert(
-        'Biometric Not Available',
-        'Your device does not support biometric authentication or it has not been set up.',
-        [{ text: 'OK' }]
-      );
-      return;
-    }
-
-    if (value) {
-      // Authenticate before enabling
-      const result = await LocalAuthentication.authenticateAsync({
-        promptMessage: 'Authenticate to enable biometric login',
-        fallbackLabel: 'Use passcode',
-      });
-
-      if (result.success) {
-        setBiometric(true);
-        handleSaveSetting('biometric', true);
-        Alert.alert(
-          'Success',
-          `${biometricType} authentication has been enabled for quick login.`,
-          [{ text: 'OK' }]
-        );
-      } else {
-        Alert.alert(
-          'Authentication Failed',
-          'Unable to verify your identity. Biometric authentication was not enabled.',
-          [{ text: 'OK' }]
-        );
-      }
-    } else {
-      setBiometric(false);
-      handleSaveSetting('biometric', false);
-      Alert.alert(
-        'Disabled',
-        'Biometric authentication has been disabled.',
-        [{ text: 'OK' }]
-      );
-    }
-  };
-
-  const handleDarkModeToggle = () => {
-    toggleTheme();
-    Alert.alert(
-      isDarkMode ? 'Light Mode Activated' : 'Dark Mode Activated',
-      `The app has switched to ${!isDarkMode ? 'dark' : 'light'} mode.`,
-      [{ text: 'OK' }]
-    );
   };
 
   const handleCurrencyChange = (value) => {
@@ -224,15 +141,15 @@ const SettingsScreen = ({ navigation }) => {
   };
 
   const handleContactSupport = () => {
-  Linking.openURL('mailto:support@dailykhata.com?subject=Support Request');
+  Linking.openURL('mailto:dailycashbook3@gmail.com?subject=Support Request');
   };
 
   const handlePrivacyPolicy = () => {
-    Linking.openURL('https://expensetracker-pro.com/privacy');
+    Linking.openURL('https://github.com/25Aakash/dailycashbook/blob/main/PRIVACY_POLICY.md');
   };
 
   const handleTermsOfService = () => {
-    Linking.openURL('https://expensetracker-pro.com/terms');
+    Linking.openURL('https://github.com/25Aakash/dailycashbook/blob/main/TERMS_OF_SERVICE.md');
   };
 
   const handleLogout = () => {
@@ -288,37 +205,6 @@ const SettingsScreen = ({ navigation }) => {
                 <Switch
                   value={notifications}
                   onValueChange={handleNotificationToggle}
-                />
-              )}
-            />
-            <Divider />
-            
-            <List.Item
-              title="Biometric Authentication"
-              description={
-                biometricAvailable 
-                  ? `Use ${biometricType} to unlock` 
-                  : 'Not available on this device'
-              }
-              left={(props) => <List.Icon {...props} icon="fingerprint" />}
-              right={() => (
-                <Switch
-                  value={biometric}
-                  onValueChange={handleBiometricToggle}
-                  disabled={!biometricAvailable}
-                />
-              )}
-            />
-            <Divider />
-            
-            <List.Item
-              title="Dark Mode"
-              description="Switch to dark theme"
-              left={(props) => <List.Icon {...props} icon="theme-light-dark" />}
-              right={() => (
-                <Switch
-                  value={isDarkMode}
-                  onValueChange={handleDarkModeToggle}
                 />
               )}
             />
