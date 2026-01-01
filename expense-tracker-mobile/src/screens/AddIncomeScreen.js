@@ -27,6 +27,7 @@ import { Picker } from '@react-native-picker/picker';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { incomeAPI, categoryAPI } from '../services/api';
 import DatePicker from '../components/DatePicker';
+import { theme } from '../utils/theme';
 
 const AddIncomeScreen = ({ navigation, route }) => {
   const { transferData } = route.params || {};

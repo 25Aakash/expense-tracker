@@ -25,6 +25,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../context/AuthContext';
+import { theme, isDarkMode } from '../utils/theme';
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -113,7 +114,7 @@ const LoginScreen = ({ navigation }) => {
 
   return (
     <LinearGradient
-      colors={['#3b82f6', '#ffffff']}
+      colors={isDarkMode ? [theme.surface, theme.background] : ['#3b82f6', '#ffffff']}
       style={styles.container}
     >
       <SafeAreaView style={styles.safeArea}>
@@ -132,10 +133,10 @@ const LoginScreen = ({ navigation }) => {
                 }
               ]}
             >
-              <View style={styles.logoCircle}>
-                <Ionicons name="wallet" size={48} color="#3b82f6" />
+              <View style={[styles.logoCircle, { backgroundColor: isDarkMode ? theme.card : '#ffffff' }]}>
+                <Ionicons name="wallet" size={48} color={theme.primary} />
               </View>
-              <Text style={styles.appName}>ExpenseTracker</Text>
+              <Text style={[styles.appName, { color: theme.text }]}>ExpenseTracker</Text>
             </Animated.View>
 
             {/* Header */}
@@ -148,8 +149,8 @@ const LoginScreen = ({ navigation }) => {
                 }
               ]}
             >
-              <Title style={styles.title}>Welcome Back!</Title>
-              <Paragraph style={styles.subtitle}>
+              <Title style={[styles.title, { color: theme.text }]}>Welcome Back!</Title>
+              <Paragraph style={[styles.subtitle, { color: theme.textSecondary }]}>
                 Sign in to your expense tracker account
               </Paragraph>
             </Animated.View>
@@ -163,10 +164,10 @@ const LoginScreen = ({ navigation }) => {
                 }
               ]}
             >
-              <Card style={styles.card} elevation={8}>
+              <Card style={[styles.card, { backgroundColor: theme.card }]} elevation={8}>
                 <Card.Content style={styles.cardContent}>
                   <View style={styles.inputContainer}>
-                    <Ionicons name="mail-outline" size={20} color="#3b82f6" style={styles.inputIcon} />
+                    <Ionicons name="mail-outline" size={20} color={theme.primary} style={styles.inputIcon} />
                     <TextInput
                       label="Email or Mobile Number"
                       value={email}
@@ -175,19 +176,21 @@ const LoginScreen = ({ navigation }) => {
                       keyboardType="default"
                       autoCapitalize="none"
                       autoCorrect={false}
-                      style={styles.input}
+                      style={[styles.input, { color: theme.text, backgroundColor: theme.card }]}
                       disabled={loading}
+                      textColor={theme.text}
                       theme={{
                         colors: {
-                          primary: '#3b82f6',
-                          outline: '#e5e7eb',
+                          primary: theme.primary,
+                          outline: isDarkMode ? theme.border : '#e5e7eb',
+                          background: theme.card,
                         }
                       }}
                     />
                   </View>
 
                   <View style={styles.inputContainer}>
-                    <Ionicons name="lock-closed-outline" size={20} color="#3b82f6" style={styles.inputIcon} />
+                    <Ionicons name="lock-closed-outline" size={20} color={theme.primary} style={styles.inputIcon} />
                     <TextInput
                       label="Password"
                       value={password}
@@ -198,15 +201,17 @@ const LoginScreen = ({ navigation }) => {
                         <TextInput.Icon
                           icon={showPassword ? 'eye-off' : 'eye'}
                           onPress={() => setShowPassword(!showPassword)}
-                          iconColor="#3b82f6"
+                          iconColor={theme.primary}
                         />
                       }
-                      style={styles.input}
+                      style={[styles.input, { color: theme.text, backgroundColor: theme.card }]}
                       disabled={loading}
+                      textColor={theme.text}
                       theme={{
                         colors: {
-                          primary: '#3b82f6',
-                          outline: '#e5e7eb',
+                          primary: theme.primary,
+                          outline: isDarkMode ? theme.border : '#e5e7eb',
+                          background: theme.card,
                         }
                       }}
                     />
@@ -217,7 +222,7 @@ const LoginScreen = ({ navigation }) => {
                     <Checkbox
                       status={rememberMe ? 'checked' : 'unchecked'}
                       onPress={() => setRememberMe(!rememberMe)}
-                      color="#3b82f6"
+                      color={theme.primary}
                       disabled={loading}
                     />
                     <TouchableOpacity 
@@ -225,7 +230,7 @@ const LoginScreen = ({ navigation }) => {
                       disabled={loading}
                       style={styles.rememberMeTextContainer}
                     >
-                      <Text style={styles.rememberMeText}>Remember me</Text>
+                      <Text style={[styles.rememberMeText, { color: theme.text }]}>Remember me</Text>
                     </TouchableOpacity>
                   </View>
 
@@ -235,12 +240,12 @@ const LoginScreen = ({ navigation }) => {
                     disabled={loading}
                     style={{ alignSelf: 'flex-end', marginBottom: 8 }}
                   >
-                    <Text style={{ color: '#3b82f6', fontWeight: '600' }}>Forgot Password?</Text>
+                    <Text style={{ color: theme.primary, fontWeight: '600' }}>Forgot Password?</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity onPress={handleLogin} disabled={loading}>
                     <LinearGradient
-                      colors={['#3b82f6', '#1d4ed8']}
+                      colors={isDarkMode ? [theme.primary, theme.secondary] : ['#3b82f6', '#1d4ed8']}
                       start={{ x: 0, y: 0 }}
                       end={{ x: 1, y: 0 }}
                       style={styles.loginButton}
@@ -257,9 +262,9 @@ const LoginScreen = ({ navigation }) => {
                   </TouchableOpacity>
 
                   <View style={styles.registerContainer}>
-                    <Text style={styles.registerText}>Don't have an account? </Text>
+                    <Text style={[styles.registerText, { color: theme.textSecondary }]}>Don't have an account? </Text>
                     <TouchableOpacity onPress={navigateToRegister} disabled={loading}>
-                      <Text style={styles.registerLink}>Sign Up</Text>
+                      <Text style={[styles.registerLink, { color: theme.primary }]}>Sign Up</Text>
                     </TouchableOpacity>
                   </View>
                 </Card.Content>

@@ -1,5 +1,4 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
-import { useColorScheme } from 'react-native';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ThemeContext = createContext();
@@ -26,27 +25,27 @@ export const lightTheme = {
 
 export const darkTheme = {
   background: '#121212',
-  surface: '#1e1e1e',
-  primary: '#66BB6A',
-  secondary: '#42A5F5',
-  text: '#ffffff',
-  textSecondary: '#b0b0b0',
-  border: '#333333',
-  card: '#1e1e1e',
-  error: '#ef5350',
-  success: '#66BB6A',
-  warning: '#ffa726',
+  surface: '#1E1E1E',
+  primary: '#4CAF50',
+  secondary: '#2196F3',
+  text: '#FFFFFF',
+  textSecondary: '#B3B3B3',
+  border: '#2D2D2D',
+  card: '#242424',
+  error: '#CF6679',
+  success: '#4CAF50',
+  warning: '#ff9800',
   shadow: '#000000',
-  tabBar: '#1e1e1e',
+  tabBar: '#1E1E1E',
   tabBarInactive: '#666666',
-  inputBackground: '#2a2a2a',
-  gradientStart: '#66BB6A',
-  gradientEnd: '#42A5F5',
+  inputBackground: '#1E1E1E',
+  gradientStart: '#4CAF50',
+  gradientEnd: '#2196F3',
 };
 
 export const ThemeProvider = ({ children }) => {
-  const systemColorScheme = useColorScheme();
-  const [isDarkMode, setIsDarkMode] = useState(systemColorScheme === 'dark');
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const theme = isDarkMode ? darkTheme : lightTheme;
 
   useEffect(() => {
     loadThemePreference();
@@ -54,12 +53,9 @@ export const ThemeProvider = ({ children }) => {
 
   const loadThemePreference = async () => {
     try {
-      const savedTheme = await AsyncStorage.getItem('darkMode');
+      const savedTheme = await AsyncStorage.getItem('isDarkMode');
       if (savedTheme !== null) {
-        setIsDarkMode(savedTheme === 'true');
-      } else {
-        // Default to system preference
-        setIsDarkMode(systemColorScheme === 'dark');
+        setIsDarkMode(JSON.parse(savedTheme));
       }
     } catch (error) {
       console.error('Error loading theme preference:', error);
@@ -68,15 +64,13 @@ export const ThemeProvider = ({ children }) => {
 
   const toggleTheme = async () => {
     try {
-      const newValue = !isDarkMode;
-      setIsDarkMode(newValue);
-      await AsyncStorage.setItem('darkMode', newValue.toString());
+      const newTheme = !isDarkMode;
+      setIsDarkMode(newTheme);
+      await AsyncStorage.setItem('isDarkMode', JSON.stringify(newTheme));
     } catch (error) {
       console.error('Error saving theme preference:', error);
     }
   };
-
-  const theme = isDarkMode ? darkTheme : lightTheme;
 
   return (
     <ThemeContext.Provider value={{ theme, isDarkMode, toggleTheme }}>

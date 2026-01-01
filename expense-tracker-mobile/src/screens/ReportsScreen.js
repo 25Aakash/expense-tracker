@@ -28,6 +28,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { expenseAPI, incomeAPI } from '../services/api';
+import { theme, isDarkMode } from '../utils/theme';
 import {
   LineChart,
   BarChart,
@@ -458,14 +459,14 @@ const ReportsScreen = ({ navigation }) => {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
         <LinearGradient
-          colors={['#ffffff', '#f8fafc']}
+          colors={isDarkMode ? [theme.background, theme.surface] : ['#ffffff', '#f8fafc']}
           style={styles.loadingContainer}
         >
           <View style={styles.loadingContent}>
-            <ActivityIndicator size="large" color="#6366f1" />
-            <Text style={styles.loadingText}>Generating financial insights...</Text>
+            <ActivityIndicator size="large" color={theme.primary} />
+            <Text style={[styles.loadingText, { color: theme.text }]}>Generating financial insights...</Text>
           </View>
         </LinearGradient>
       </SafeAreaView>
@@ -473,10 +474,10 @@ const ReportsScreen = ({ navigation }) => {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       {/* Enhanced Header with Gradient */}
       <LinearGradient
-        colors={['#ffffff', '#f8fafc']}
+        colors={isDarkMode ? [theme.background, theme.surface] : ['#ffffff', '#f8fafc']}
         style={styles.headerGradient}
       >
         <Animated.View 
@@ -489,13 +490,13 @@ const ReportsScreen = ({ navigation }) => {
           ]}
         >
           <View style={styles.headerText}>
-            <Text style={styles.headerTitle}>Financial Reports</Text>
+            <Text style={[styles.headerTitle, { color: theme.text }]}>Financial Reports</Text>
           </View>
         </Animated.View>
       </LinearGradient>
 
       {/* Enhanced Filters Section */}
-      <View style={styles.filtersContainer}>
+      <View style={[styles.filtersContainer, { backgroundColor: theme.background }]}>
         {/* Search Bar */}
         <View style={styles.searchContainer}>
           <Searchbar
@@ -591,15 +592,15 @@ const ReportsScreen = ({ navigation }) => {
       </View>
 
       <ScrollView 
-        style={styles.content}
+        style={[styles.content, { backgroundColor: theme.background }]}
         contentContainerStyle={styles.contentContainer}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl 
             refreshing={refreshing} 
             onRefresh={onRefresh}
-            colors={['#6366f1']}
-            tintColor="#6366f1"
+            colors={[theme.primary]}
+            tintColor={theme.primary}
           />
         }
       >
@@ -615,33 +616,33 @@ const ReportsScreen = ({ navigation }) => {
         >
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.statsRow}>
             <LinearGradient
-              colors={['#ffffff', '#f8fafc']}
+              colors={isDarkMode ? [theme.card, theme.surface] : ['#ffffff', '#f8fafc']}
               style={styles.statCard}
             >
               <View style={styles.statContent}>
                 <View style={styles.statIconContainer}>
                   <Ionicons name="trending-up" size={24} color="#10b981" />
                 </View>
-                <Text style={styles.statLabel}>Total Income</Text>
-                <Text style={styles.statValue}>₹{reportData.totalIncome.toLocaleString()}</Text>
+                <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Total Income</Text>
+                <Text style={[styles.statValue, { color: theme.text }]}>₹{reportData.totalIncome.toLocaleString()}</Text>
               </View>
             </LinearGradient>
 
             <LinearGradient
-              colors={['#ffffff', '#f8fafc']}
+              colors={isDarkMode ? [theme.card, theme.surface] : ['#ffffff', '#f8fafc']}
               style={styles.statCard}
             >
               <View style={styles.statContent}>
                 <View style={styles.statIconContainer}>
                   <Ionicons name="trending-down" size={24} color="#ef4444" />
                 </View>
-                <Text style={styles.statLabel}>Total Expenses</Text>
-                <Text style={styles.statValue}>₹{reportData.totalExpenses.toLocaleString()}</Text>
+                <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Total Expenses</Text>
+                <Text style={[styles.statValue, { color: theme.text }]}>₹{reportData.totalExpenses.toLocaleString()}</Text>
               </View>
             </LinearGradient>
 
             <LinearGradient
-              colors={['#ffffff', '#f8fafc']}
+              colors={isDarkMode ? [theme.card, theme.surface] : ['#ffffff', '#f8fafc']}
               style={styles.statCard}
             >
               <View style={styles.statContent}>
@@ -652,7 +653,7 @@ const ReportsScreen = ({ navigation }) => {
                     color={reportData.balance >= 0 ? "#6366f1" : "#f59e0b"}
                   />
                 </View>
-                <Text style={styles.statLabel}>Net Balance</Text>
+                <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Net Balance</Text>
                 <Text style={[
                   styles.statValue,
                   { color: reportData.balance >= 0 ? "#10b981" : "#ef4444" }
@@ -664,11 +665,11 @@ const ReportsScreen = ({ navigation }) => {
 
         {/* Quick Insights Cards */}
         <Animated.View style={{ opacity: fadeAnim }}>
-          <Surface style={styles.insightsCard} elevation={4}>
+          <Surface style={[styles.insightsCard, { backgroundColor: theme.card }]} elevation={4}>
             <View style={styles.insightsHeader}>
-              <Text style={styles.sectionTitle}>Quick Insights</Text>
+              <Text style={[styles.sectionTitle, { color: theme.text }]}>Quick Insights</Text>
               <View style={styles.insightsIcon}>
-                <Ionicons name="bulb" size={20} color="#6366f1" />
+                <Ionicons name="bulb" size={20} color={theme.primary} />
               </View>
             </View>
             <View style={styles.insightsGrid}>
@@ -676,8 +677,8 @@ const ReportsScreen = ({ navigation }) => {
                 <View style={styles.insightIconContainer}>
                   <Ionicons name="calendar-outline" size={16} color="#10b981" />
                 </View>
-                <Text style={styles.insightLabel}>Avg Daily</Text>
-                <Text style={styles.insightValue}>
+                <Text style={[styles.insightLabel, { color: theme.textSecondary }]}>Avg Daily</Text>
+                <Text style={[styles.insightValue, { color: theme.text }]}>
                   ₹{Math.round(reportData.totalExpenses / 30).toLocaleString()}
                 </Text>
               </View>
@@ -686,18 +687,18 @@ const ReportsScreen = ({ navigation }) => {
                 <View style={styles.insightIconContainer}>
                   <Ionicons name="trending-up" size={16} color="#ef4444" />
                 </View>
-                <Text style={styles.insightLabel}>Highest</Text>
-                <Text style={styles.insightValue}>
+                <Text style={[styles.insightLabel, { color: theme.textSecondary }]}>Highest</Text>
+                <Text style={[styles.insightValue, { color: theme.text }]}>
                   ₹{Math.max(...(allData.expenses.map(e => e.amount) || [0])).toLocaleString()}
                 </Text>
               </View>
               
               <View style={styles.insightItem}>
                 <View style={styles.insightIconContainer}>
-                  <Ionicons name="card" size={16} color="#6366f1" />
+                  <Ionicons name="card" size={16} color={theme.primary} />
                 </View>
-                <Text style={styles.insightLabel}>Top Method</Text>
-                <Text style={styles.insightValue}>
+                <Text style={[styles.insightLabel, { color: theme.textSecondary }]}>Top Method</Text>
+                <Text style={[styles.insightValue, { color: theme.text }]}>
                   {getMostUsedMethod()}
                 </Text>
               </View>
@@ -706,8 +707,8 @@ const ReportsScreen = ({ navigation }) => {
                 <View style={styles.insightIconContainer}>
                   <Ionicons name="time" size={16} color="#f59e0b" />
                 </View>
-                <Text style={styles.insightLabel}>Last Activity</Text>
-                <Text style={styles.insightValue}>
+                <Text style={[styles.insightLabel, { color: theme.textSecondary }]}>Last Activity</Text>
+                <Text style={[styles.insightValue, { color: theme.text }]}>
                   {getLastActivityDays()} days
                 </Text>
               </View>
@@ -717,14 +718,14 @@ const ReportsScreen = ({ navigation }) => {
 
         {/* Income vs Expenses Trend */}
         <Animated.View style={{ opacity: fadeAnim }}>
-          <Surface style={styles.chartCard} elevation={4}>
+          <Surface style={[styles.chartCard, { backgroundColor: theme.card }]} elevation={4}>
             <LinearGradient
-              colors={['#f8fafc', '#e2e8f0']}
+              colors={isDarkMode ? [theme.card, theme.surface] : ['#f8fafc', '#e2e8f0']}
               style={styles.chartGradient}
             >
               <View style={styles.chartHeader}>
                 <View>
-                  <Title style={styles.chartTitle}>Expense Trend (Last 7 Days)</Title>
+                  <Title style={[styles.chartTitle, { color: theme.text }]}>Expense Trend (Last 7 Days)</Title>
                 </View>
                 <View style={styles.chartIcon}>
                   <Ionicons name="analytics" size={24} color="#ef4444" />
@@ -738,16 +739,21 @@ const ReportsScreen = ({ navigation }) => {
                   chartConfig={{
                     ...chartConfig,
                     color: (opacity = 1) => `rgba(239, 68, 68, ${opacity})`,
+                    labelColor: (opacity = 1) => isDarkMode ? `rgba(255, 255, 255, ${opacity})` : `rgba(0, 0, 0, ${opacity})`,
+                    propsForBackgroundLines: {
+                      stroke: theme.border,
+                    },
                   }}
                   style={styles.chart}
                   withDots={true}
                   withShadow={false}
                   withInnerLines={false}
+                  bezier
                 />
               ) : (
                 <View style={styles.noDataContainer}>
-                  <Ionicons name="bar-chart-outline" size={32} color="#e5e7eb" />
-                  <Text style={styles.noDataText}>No expense data</Text>
+                  <Ionicons name="bar-chart-outline" size={32} color={theme.border} />
+                  <Text style={[styles.noDataText, { color: theme.textSecondary }]}>No expense data</Text>
                 </View>
               )}
             </LinearGradient>

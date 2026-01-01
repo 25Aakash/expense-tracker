@@ -22,6 +22,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../context/AuthContext';
+import { theme } from '../utils/theme';
 import { expenseAPI, incomeAPI } from '../services/api';
 import { format, startOfMonth, endOfMonth } from 'date-fns';
 

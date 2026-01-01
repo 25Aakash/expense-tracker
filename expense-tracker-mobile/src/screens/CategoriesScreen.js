@@ -26,6 +26,7 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { categoryAPI, expenseAPI, incomeAPI } from '../services/api';
 import { format, parseISO } from 'date-fns';
+import { theme, isDarkMode } from '../utils/theme';
 
 const { width } = Dimensions.get('window');
 
@@ -202,7 +203,7 @@ const CategoriesScreen = () => {
         onPress={() => handleCategoryPress(category.name, type)}
         activeOpacity={0.7}
       >
-        <Surface style={styles.categoryItem} elevation={2}>
+        <Surface style={[styles.categoryItem, { backgroundColor: theme.card }]} elevation={2}>
           <View style={styles.categoryContent}>
             <View style={styles.categoryLeft}>
               <View style={[
@@ -216,14 +217,14 @@ const CategoriesScreen = () => {
                 />
               </View>
               <View style={styles.categoryInfo}>
-                <Text style={styles.categoryName}>{category.name}</Text>
+                <Text style={[styles.categoryName, { color: theme.text }]}>{category.name}</Text>
                 <View style={styles.categoryStats}>
                   <Text style={[styles.categoryAmount, { color }]}>
                     ₹{totalAmount.toLocaleString('en-IN')}
                   </Text>
                   <View style={styles.transactionInfo}>
-                    <Ionicons name="receipt-outline" size={12} color="#94a3b8" />
-                    <Text style={styles.transactionCount}>
+                    <Ionicons name="receipt-outline" size={12} color={theme.textSecondary} />
+                    <Text style={[styles.transactionCount, { color: theme.textSecondary }]}>
                       {transactionCount} transaction{transactionCount !== 1 ? 's' : ''}
                     </Text>
                   </View>
@@ -241,7 +242,7 @@ const CategoriesScreen = () => {
                 <Ionicons name="trash-outline" size={18} color="#ef4444" />
               </TouchableOpacity>
               <View style={styles.chevronContainer}>
-                <Ionicons name="chevron-forward" size={20} color="#cbd5e1" />
+                <Ionicons name="chevron-forward" size={20} color={theme.border} />
               </View>
             </View>
           </View>
@@ -363,44 +364,45 @@ const CategoriesScreen = () => {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" />
-        <Text style={styles.loadingText}>Loading categories...</Text>
+      <View style={[styles.loadingContainer, { backgroundColor: theme.background }]}>
+        <ActivityIndicator size="large" color={theme.primary} />
+        <Text style={[styles.loadingText, { color: theme.text }]}>Loading categories...</Text>
       </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       {/* Enhanced Tab Header */}
-      <View style={styles.tabHeaderContainer}>
+      <View style={[styles.tabHeaderContainer, { backgroundColor: theme.card }]}>
         <View style={styles.tabHeader}>
           <TouchableOpacity
             style={[
               styles.tabButton,
-              activeTab === 0 && styles.tabButtonActive,
-              activeTab === 0 && { backgroundColor: '#fef2f2', borderColor: '#ef4444' }
+              { backgroundColor: isDarkMode ? theme.surface : '#ffffff' },
+              activeTab === 0 && { backgroundColor: isDarkMode ? '#7f1d1d20' : '#fef2f2', borderColor: '#ef4444' }
             ]}
             onPress={() => switchTab(0)}
           >
             <View style={[
               styles.tabIconContainer,
-              { backgroundColor: activeTab === 0 ? '#ef4444' : '#f1f5f9' }
+              { backgroundColor: activeTab === 0 ? '#ef4444' : (isDarkMode ? theme.card : '#f1f5f9') }
             ]}>
               <Ionicons 
                 name="remove" 
                 size={16} 
-                color={activeTab === 0 ? 'white' : '#64748b'} 
+                color={activeTab === 0 ? 'white' : theme.textSecondary} 
               />
             </View>
             <View style={styles.tabTextContainer}>
               <Text style={[
                 styles.tabButtonText,
+                { color: theme.text },
                 activeTab === 0 && { color: '#ef4444', fontWeight: '600' }
               ]}>
                 Expenses
               </Text>
-              <Text style={styles.tabSubText}>
+              <Text style={[styles.tabSubText, { color: theme.textSecondary }]}>
                 {expenseCategories.length} categories
               </Text>
             </View>

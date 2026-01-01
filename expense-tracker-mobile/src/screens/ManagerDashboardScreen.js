@@ -32,6 +32,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../context/AuthContext';
+import { theme, isDarkMode } from '../utils/theme';
 import { managerAPI } from '../services/api';
 import { format } from 'date-fns';
 
@@ -394,17 +395,17 @@ const ManagerDashboardScreen = () => {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" />
-        <Text style={styles.loadingText}>Loading team dashboard...</Text>
+      <View style={[styles.loadingContainer, { backgroundColor: theme.background }]}>
+        <ActivityIndicator size="large" color={theme.primary} />
+        <Text style={[styles.loadingText, { color: theme.text }]}>Loading team dashboard...</Text>
       </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <LinearGradient
-        colors={['#ffffff', '#f8fafc', '#ffffff']}
+        colors={isDarkMode ? [theme.background, theme.surface, theme.background] : ['#ffffff', '#f8fafc', '#ffffff']}
         style={styles.gradient}
       >
         <Animated.View 
@@ -419,14 +420,14 @@ const ManagerDashboardScreen = () => {
           {/* Header */}
           <View style={styles.header}>
             <View>
-              <Text style={styles.headerTitle}>Team Dashboard</Text>
-              <Text style={styles.headerSubtitle}>Manage your team members</Text>
+              <Text style={[styles.headerTitle, { color: theme.text }]}>Team Dashboard</Text>
+              <Text style={[styles.headerSubtitle, { color: theme.textSecondary }]}>Manage your team members</Text>
             </View>
             <TouchableOpacity 
-              style={styles.headerAction}
+              style={[styles.headerAction, { backgroundColor: isDarkMode ? theme.primary + '20' : '#e0e7ff' }]}
               onPress={() => setShowAddDialog(true)}
             >
-              <Ionicons name="person-add" size={24} color="#6366f1" />
+              <Ionicons name="person-add" size={24} color={theme.primary} />
             </TouchableOpacity>
           </View>
 
@@ -436,9 +437,12 @@ const ManagerDashboardScreen = () => {
               placeholder="Search team members..."
               onChangeText={setSearchQuery}
               value={searchQuery}
-              style={styles.searchBar}
-              icon={() => <Ionicons name="search" size={20} color="#6b7280" />}
-              clearIcon={() => <Ionicons name="close" size={20} color="#6b7280" />}
+              style={[styles.searchBar, { backgroundColor: theme.surface }]}
+              inputStyle={{ color: theme.text }}
+              iconColor={theme.textSecondary}
+              placeholderTextColor={theme.textSecondary}
+              icon={() => <Ionicons name="search" size={20} color={theme.textSecondary} />}
+              clearIcon={() => <Ionicons name="close" size={20} color={theme.textSecondary} />}
             />
             <SegmentedButtons
               value={viewMode}
@@ -455,7 +459,7 @@ const ManagerDashboardScreen = () => {
                   icon: 'grid',
                 },
               ]}
-              style={styles.viewToggle}
+              style={[styles.viewToggle, { backgroundColor: theme.surface }]}
             />
           </View>
 
