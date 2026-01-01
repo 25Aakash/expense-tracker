@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 import { authAPI } from '../services/api';
 
 const AuthContext = createContext({});
@@ -23,8 +23,8 @@ export const AuthProvider = ({ children }) => {
 
   const loadStoredAuth = async () => {
     try {
-      const storedToken = await AsyncStorage.getItem('token');
-      const storedUser = await AsyncStorage.getItem('user');
+      const storedToken = await SecureStore.getItemAsync('token');
+      const storedUser = await SecureStore.getItemAsync('user');
       
       if (storedToken && storedUser) {
         setToken(storedToken);
@@ -49,9 +49,9 @@ export const AuthProvider = ({ children }) => {
       if (response.data.token && response.data.user) {
         const { token: authToken, user: userData, permissions } = response.data;
         const mergedUser = permissions ? { ...userData, permissions } : userData;
-        // Store in AsyncStorage
-        await AsyncStorage.setItem('token', authToken);
-        await AsyncStorage.setItem('user', JSON.stringify(mergedUser));
+        // Store in SecureStore
+        await SecureStore.setItemAsync('token', authToken);
+        await SecureStore.setItemAsync('user', JSON.stringify(mergedUser));
         // Update state
         setToken(authToken);
         setUser(mergedUser);
@@ -104,9 +104,9 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      // Clear AsyncStorage
-      await AsyncStorage.removeItem('token');
-      await AsyncStorage.removeItem('user');
+      // Clear SecureStore
+      await SecureStore.deleteItemAsync('token');
+      await SecureStore.deleteItemAsync('user');
       
       // Clear state
       setToken(null);
@@ -134,7 +134,7 @@ export const AuthProvider = ({ children }) => {
           mergedUser = response.data;
         }
         setUser(mergedUser);
-        await AsyncStorage.setItem('user', JSON.stringify(mergedUser));
+        await SecureStore.setItemAsync('user', JSON.stringify(mergedUser));
       }
     } catch (error) {
       console.error('Failed to refresh user:', error);
