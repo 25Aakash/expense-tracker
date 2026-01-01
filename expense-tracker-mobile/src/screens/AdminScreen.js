@@ -20,6 +20,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
+import { theme } from '../utils/theme';
 import { adminAPI } from '../services/api';
 
 const AdminScreen = () => {

@@ -19,6 +19,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { authAPI } from '../services/api';
+import { theme } from '../utils/theme';
 
 const ResetPasswordScreen = ({ navigation }) => {
   const [identifier, setIdentifier] = useState('');

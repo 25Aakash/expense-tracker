@@ -22,6 +22,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
+import { theme, isDarkMode } from '../utils/theme';
 import usePermissions from '../hooks/usePermissions';
 import { expenseAPI, incomeAPI } from '../services/api';
 import { format } from 'date-fns';
@@ -260,8 +261,8 @@ const DashboardScreen = ({ navigation, route }) => {
   if (!user) {
     console.log('No user found, showing login prompt');
     return (
-      <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>Please log in to view dashboard</Text>
+      <View style={[styles.errorContainer, { backgroundColor: theme.background }]}>
+        <Text style={[styles.errorText, { color: theme.text }]}>Please log in to view dashboard</Text>
         <Button mode="contained" onPress={() => navigation.navigate('Login')}>
           Go to Login
         </Button>
@@ -273,11 +274,11 @@ const DashboardScreen = ({ navigation, route }) => {
     console.log('Dashboard is loading...');
     return (
       <LinearGradient
-        colors={['#ffffff', '#f8fafc']}
+        colors={isDarkMode ? [theme.background, theme.surface] : ['#ffffff', '#f8fafc']}
         style={styles.loadingContainer}
       >
-        <ActivityIndicator size="large" color="#6366f1" />
-        <Text style={styles.loadingText}>Loading dashboard...</Text>
+        <ActivityIndicator size="large" color={theme.primary} />
+        <Text style={[styles.loadingText, { color: theme.text }]}>Loading dashboard...</Text>
       </LinearGradient>
     );
   }
@@ -286,7 +287,7 @@ const DashboardScreen = ({ navigation, route }) => {
   
   return (
     <LinearGradient
-      colors={['#f8fafc', '#e2e8f0']}
+      colors={isDarkMode ? [theme.background, theme.surface] : ['#f8fafc', '#e2e8f0']}
       style={styles.container}
     >
       <Animated.ScrollView
@@ -299,15 +300,15 @@ const DashboardScreen = ({ navigation, route }) => {
           <RefreshControl 
             refreshing={refreshing} 
             onRefresh={onRefresh}
-            colors={['#6366f1']}
-            tintColor="#6366f1"
+            colors={[theme.primary]}
+            tintColor={theme.primary}
           />
         }
         showsVerticalScrollIndicator={false}
       >
         {/* Enhanced Header with Gradient */}
         <LinearGradient
-          colors={['#ffffff', '#f8fafc']}
+          colors={isDarkMode ? [theme.surface, theme.card] : ['#ffffff', '#f8fafc']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.header}
@@ -317,16 +318,16 @@ const DashboardScreen = ({ navigation, route }) => {
               <Avatar.Text
                 size={44}
                 label={user?.name?.charAt(0) || 'U'}
-                style={styles.avatar}
+                style={[styles.avatar, { backgroundColor: theme.primary }]}
                 labelStyle={styles.avatarLabel}
               />
               <View style={styles.greetingContainer}>
-                <Text style={styles.greetingText}>Good {getTimeOfDay()}</Text>
-                <Text style={styles.userName}>{user?.name || 'User'}</Text>
+                <Text style={[styles.greetingText, { color: theme.textSecondary }]}>Good {getTimeOfDay()}</Text>
+                <Text style={[styles.userName, { color: theme.text }]}>{user?.name || 'User'}</Text>
               </View>
             </View>
             <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-              <Ionicons name="log-out-outline" size={24} color="white" />
+              <Ionicons name="log-out-outline" size={24} color={theme.primary} />
             </TouchableOpacity>
           </View>
         </LinearGradient>
@@ -342,19 +343,19 @@ const DashboardScreen = ({ navigation, route }) => {
           <LinearGradient
             colors={
               stats.balance >= 0 
-                ? ['#ffffff', '#f8fafc'] 
-                : ['#ffffff', '#f8fafc']
+                ? isDarkMode ? [theme.surface, theme.card] : ['#ffffff', '#f8fafc']
+                : isDarkMode ? [theme.surface, theme.card] : ['#ffffff', '#f8fafc']
             }
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.balanceCard}
           >
             <View style={styles.balanceHeader}>
-              <Text style={styles.balanceLabel}>Current Balance</Text>
+              <Text style={[styles.balanceLabel, { color: theme.textSecondary }]}>Current Balance</Text>
               <Ionicons 
                 name={stats.balance >= 0 ? "trending-up" : "trending-down"} 
                 size={24} 
-                color="white" 
+                color={theme.primary}
               />
             </View>
             <Text style={[
@@ -371,8 +372,8 @@ const DashboardScreen = ({ navigation, route }) => {
                   <Ionicons name="trending-up" size={16} color="#10b981" />
                 </View>
                 <View style={styles.balanceItemContent}>
-                  <Text style={styles.balanceItemLabel}>Total Income</Text>
-                  <Text style={styles.balanceItemAmount}>
+                  <Text style={[styles.balanceItemLabel, { color: theme.textSecondary }]}>Total Income</Text>
+                  <Text style={[styles.balanceItemAmount, { color: theme.text }]}>
                     {formatCurrency(stats.totalIncome)}
                   </Text>
                 </View>
@@ -383,15 +384,15 @@ const DashboardScreen = ({ navigation, route }) => {
                   <Ionicons name="trending-down" size={16} color="#ef4444" />
                 </View>
                 <View style={styles.balanceItemContent}>
-                  <Text style={styles.balanceItemLabel}>Total Expenses</Text>
-                  <Text style={styles.balanceItemAmount}>
+                  <Text style={[styles.balanceItemLabel, { color: theme.textSecondary }]}>Total Expenses</Text>
+                  <Text style={[styles.balanceItemAmount, { color: theme.text }]}>
                     {formatCurrency(stats.totalExpenses)}
                   </Text>
                 </View>
               </View>
             </View>
             
-            <Text style={styles.balanceSubtext}>
+            <Text style={[styles.balanceSubtext, { color: theme.textSecondary }]}>
               {stats.balance >= 0 ? 'You\'re doing great!' : 'Keep track of expenses'}
             </Text>
           </LinearGradient>
@@ -400,11 +401,11 @@ const DashboardScreen = ({ navigation, route }) => {
   {/* Method Balance Cards removed as per user request */}
 
         {/* Monthly Overview */}
-        <Surface style={styles.monthlyCard} elevation={2}>
+        <Surface style={[styles.monthlyCard, { backgroundColor: theme.card }]} elevation={2}>
           <View style={styles.monthlyHeader}>
-            <Text style={styles.sectionTitle}>This Month</Text>
+            <Text style={[styles.sectionTitle, { color: theme.text }]}>This Month</Text>
             <View style={styles.monthlyIconContainer}>
-              <Ionicons name="calendar-outline" size={20} color="#6366f1" />
+              <Ionicons name="calendar-outline" size={20} color={theme.primary} />
             </View>
           </View>
           <View style={styles.monthlyStats}>
@@ -413,8 +414,8 @@ const DashboardScreen = ({ navigation, route }) => {
                 <Ionicons name="trending-up" size={20} color="#10b981" />
               </View>
               <View style={styles.monthlyStatContent}>
-                <Text style={styles.monthlyStatLabel}>Income</Text>
-                <Text style={styles.monthlyIncomeAmount}>
+                <Text style={[styles.monthlyStatLabel, { color: theme.textSecondary }]}>Income</Text>
+                <Text style={[styles.monthlyIncomeAmount, { color: theme.text }]}>
                   {formatCurrency(stats.monthlyIncome)}
                 </Text>
               </View>
@@ -424,8 +425,8 @@ const DashboardScreen = ({ navigation, route }) => {
                 <Ionicons name="trending-down" size={20} color="#ef4444" />
               </View>
               <View style={styles.monthlyStatContent}>
-                <Text style={styles.monthlyStatLabel}>Expenses</Text>
-                <Text style={styles.monthlyExpenseAmount}>
+                <Text style={[styles.monthlyStatLabel, { color: theme.textSecondary }]}>Expenses</Text>
+                <Text style={[styles.monthlyExpenseAmount, { color: theme.text }]}>
                   {formatCurrency(stats.monthlyExpenses)}
                 </Text>
               </View>
@@ -434,8 +435,8 @@ const DashboardScreen = ({ navigation, route }) => {
         </Surface>
 
         {/* Quick Actions with Dynamic Grid Layout based on Permissions */}
-        <Surface style={styles.actionsCard} elevation={2}>
-          <Text style={styles.sectionTitle}>Quick Actions</Text>
+        <Surface style={[styles.actionsCard, { backgroundColor: theme.card }]} elevation={2}>
+          <Text style={[styles.sectionTitle, { color: theme.text }]}>Quick Actions</Text>
           <View style={styles.actionsGrid}>
             {/* Top Row - Add Actions (always available for basic functionality) */}
             <View style={styles.actionsRow}>
@@ -444,7 +445,7 @@ const DashboardScreen = ({ navigation, route }) => {
                 style={styles.actionWrapper}
               >
                 <LinearGradient
-                  colors={['#ffffff', '#f8fafc']}
+                  colors={isDarkMode ? [theme.surface, theme.card] : ['#ffffff', '#f8fafc']}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
                   style={styles.actionItem}
@@ -452,7 +453,7 @@ const DashboardScreen = ({ navigation, route }) => {
                   <View style={styles.actionIcon}>
                     <Ionicons name="remove-circle" size={28} color="#ef4444" />
                   </View>
-                  <Text style={styles.actionLabel}>Add Expense</Text>
+                  <Text style={[styles.actionLabel, { color: theme.text }]}>Add Expense</Text>
                 </LinearGradient>
               </TouchableOpacity>
 
@@ -461,7 +462,7 @@ const DashboardScreen = ({ navigation, route }) => {
                 style={styles.actionWrapper}
               >
                 <LinearGradient
-                  colors={['#ffffff', '#f8fafc']}
+                  colors={isDarkMode ? [theme.surface, theme.card] : ['#ffffff', '#f8fafc']}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
                   style={styles.actionItem}
@@ -469,7 +470,7 @@ const DashboardScreen = ({ navigation, route }) => {
                   <View style={styles.actionIcon}>
                     <Ionicons name="add-circle" size={28} color="#10b981" />
                   </View>
-                  <Text style={styles.actionLabel}>Add Income</Text>
+                  <Text style={[styles.actionLabel, { color: theme.text }]}>Add Income</Text>
                 </LinearGradient>
               </TouchableOpacity>
             </View>
@@ -483,15 +484,15 @@ const DashboardScreen = ({ navigation, route }) => {
                   style={styles.actionWrapper}
                 >
                   <LinearGradient
-                    colors={['#ffffff', '#f8fafc']}
+                    colors={isDarkMode ? [theme.surface, theme.card] : ['#ffffff', '#f8fafc']}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 1 }}
                     style={styles.actionItem}
                   >
                     <View style={styles.actionIcon}>
-                      <Ionicons name="bar-chart" size={28} color="#6366f1" />
+                      <Ionicons name="bar-chart" size={28} color={theme.primary} />
                     </View>
-                    <Text style={styles.actionLabel}>Reports</Text>
+                    <Text style={[styles.actionLabel, { color: theme.text }]}>Reports</Text>
                   </LinearGradient>
                 </TouchableOpacity>
               )}
@@ -502,7 +503,7 @@ const DashboardScreen = ({ navigation, route }) => {
                 style={styles.actionWrapper}
               >
                 <LinearGradient
-                  colors={['#ffffff', '#f8fafc']}
+                  colors={isDarkMode ? [theme.surface, theme.card] : ['#ffffff', '#f8fafc']}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
                   style={styles.actionItem}
@@ -510,7 +511,7 @@ const DashboardScreen = ({ navigation, route }) => {
                   <View style={styles.actionIcon}>
                     <Ionicons name="list" size={28} color="#8b5cf6" />
                   </View>
-                  <Text style={styles.actionLabel}>Categories</Text>
+                  <Text style={[styles.actionLabel, { color: theme.text }]}>Categories</Text>
                 </LinearGradient>
               </TouchableOpacity>
               
@@ -520,15 +521,15 @@ const DashboardScreen = ({ navigation, route }) => {
                 style={styles.actionWrapper}
               >
                 <LinearGradient
-                  colors={['#ffffff', '#f8fafc']}
+                  colors={isDarkMode ? [theme.surface, theme.card] : ['#ffffff', '#f8fafc']}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
                   style={styles.actionItem}
                 >
                   <View style={styles.actionIcon}>
-                    <Ionicons name="list-outline" size={28} color="#6b7280" />
+                    <Ionicons name="list-outline" size={28} color={theme.textSecondary} />
                   </View>
-                  <Text style={styles.actionLabel}>View All</Text>
+                  <Text style={[styles.actionLabel, { color: theme.text }]}>View All</Text>
                 </LinearGradient>
               </TouchableOpacity>
             </View>
@@ -536,29 +537,29 @@ const DashboardScreen = ({ navigation, route }) => {
         </Surface>
 
         {/* Recent Transactions with Enhanced Design */}
-        <Surface style={styles.recentCard} elevation={2}>
+        <Surface style={[styles.recentCard, { backgroundColor: theme.card }]} elevation={2}>
           <View style={styles.recentHeader}>
-            <Text style={styles.sectionTitle}>Recent Transactions</Text>
+            <Text style={[styles.sectionTitle, { color: theme.text }]}>Recent Transactions</Text>
             <TouchableOpacity
               onPress={() => navigation.navigate('Transactions')}
             >
               <LinearGradient
-                colors={['#ffffff', '#f8fafc']}
+                colors={isDarkMode ? [theme.surface, theme.card] : ['#ffffff', '#f8fafc']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={styles.viewAllGradient}
               >
-                <Text style={styles.viewAllText}>View All</Text>
-                <Ionicons name="chevron-forward" size={16} color="#6366f1" />
+                <Text style={[styles.viewAllText, { color: theme.primary }]}>View All</Text>
+                <Ionicons name="chevron-forward" size={16} color={theme.primary} />
               </LinearGradient>
             </TouchableOpacity>
           </View>
           
           {stats.recentTransactions.length === 0 ? (
             <View style={styles.emptyState}>
-              <Ionicons name="receipt-outline" size={48} color="#e5e7eb" />
-              <Text style={styles.emptyText}>No recent transactions</Text>
-              <Text style={styles.emptySubText}>Start adding expenses and income!</Text>
+              <Ionicons name="receipt-outline" size={48} color={theme.border} />
+              <Text style={[styles.emptyText, { color: theme.textSecondary }]}>No recent transactions</Text>
+              <Text style={[styles.emptySubText, { color: theme.textSecondary }]}>Start adding expenses and income!</Text>
             </View>
           ) : (
             <Animated.View 
@@ -584,12 +585,12 @@ const DashboardScreen = ({ navigation, route }) => {
                       />
                     </View>
                     <View style={styles.transactionInfo}>
-                      <Text style={styles.transactionCategory}>{transaction.category}</Text>
+                      <Text style={[styles.transactionCategory, { color: theme.text }]}>{transaction.category}</Text>
                       <View style={styles.transactionMeta}>
-                        <Text style={styles.transactionMethod}>
+                        <Text style={[styles.transactionMethod, { color: theme.textSecondary }]}>
                           {transaction.method}
                         </Text>
-                        <Text style={styles.transactionDate}>
+                        <Text style={[styles.transactionDate, { color: theme.textSecondary }]}>
                           {format(new Date(transaction.date), 'MMM dd')}
                         </Text>
                       </View>

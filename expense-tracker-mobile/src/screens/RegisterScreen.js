@@ -23,6 +23,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
+import { theme, isDarkMode } from '../utils/theme';
 
 const RegisterScreen = ({ navigation }) => {
   const [formData, setFormData] = useState({
@@ -141,9 +142,9 @@ const RegisterScreen = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       <LinearGradient
-        colors={['#3b82f6', '#ffffff']}
+        colors={isDarkMode ? [theme.surface, theme.background] : [theme.primary, '#ffffff']}
         style={styles.container}
       >
         <SafeAreaView style={styles.safeArea}>
@@ -163,15 +164,15 @@ const RegisterScreen = ({ navigation }) => {
                 ]}
               >
                 <LinearGradient
-                  colors={['#3b82f6', '#1d4ed8', '#1e40af']}
+                  colors={[theme.primary, theme.secondary, theme.primary]}
                   style={styles.logoCircle}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
                 >
                   <Ionicons name="wallet" size={48} color="white" />
                 </LinearGradient>
-                <Text style={styles.appName}>ExpenseTracker</Text>
-                <Text style={styles.tagline}>Smart Expense Management</Text>
+                <Text style={[styles.appName, { color: theme.text }]}>ExpenseTracker</Text>
+                <Text style={[styles.tagline, { color: theme.textSecondary }]}>Smart Expense Management</Text>
               </Animated.View>
 
               {/* Animated Header */}
@@ -184,8 +185,8 @@ const RegisterScreen = ({ navigation }) => {
                   }
                 ]}
               >
-                <Text style={styles.title}>Create Your Account</Text>
-                <Text style={styles.subtitle}>
+                <Text style={[styles.title, { color: theme.text }]}>Create Your Account</Text>
+                <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
                   Start your financial journey with us today
                 </Text>
               </Animated.View>
@@ -199,14 +200,14 @@ const RegisterScreen = ({ navigation }) => {
                   }
                 ]}
               >
-                <Card style={styles.card}>
+                <Card style={[styles.card, { backgroundColor: theme.card }]}>
                   <Card.Content style={styles.cardContent}>
                     {/* Name Input */}
                     <View style={styles.inputContainer}>
                       <Ionicons 
                         name="person-outline" 
                         size={22} 
-                        color="#667eea" 
+                        color={theme.primary} 
                         style={styles.inputIcon}
                       />
                       <TextInput
@@ -215,12 +216,14 @@ const RegisterScreen = ({ navigation }) => {
                         onChangeText={(value) => handleInputChange('name', value)}
                         mode="outlined"
                         autoCapitalize="words"
-                        style={styles.input}
+                        style={[styles.input, { color: theme.text, backgroundColor: theme.card }]}
                         disabled={loading}
+                        textColor={theme.text}
                         theme={{
                           colors: {
-                            primary: '#667eea',
-                            outline: '#d1d5db',
+                            primary: theme.primary,
+                            outline: isDarkMode ? theme.border : '#d1d5db',
+                            background: theme.card,
                           }
                         }}
                       />
@@ -231,7 +234,7 @@ const RegisterScreen = ({ navigation }) => {
                       <Ionicons 
                         name="mail-outline" 
                         size={22} 
-                        color="#667eea" 
+                        color={theme.primary} 
                         style={styles.inputIcon}
                       />
                       <TextInput
@@ -242,12 +245,14 @@ const RegisterScreen = ({ navigation }) => {
                         keyboardType="email-address"
                         autoCapitalize="none"
                         autoCorrect={false}
-                        style={styles.input}
+                        style={[styles.input, { color: theme.text, backgroundColor: theme.card }]}
                         disabled={loading}
+                        textColor={theme.text}
                         theme={{
                           colors: {
-                            primary: '#667eea',
-                            outline: '#d1d5db',
+                            primary: theme.primary,
+                            outline: isDarkMode ? theme.border : '#d1d5db',
+                            background: theme.card,
                           }
                         }}
                       />
@@ -258,7 +263,7 @@ const RegisterScreen = ({ navigation }) => {
                       <Ionicons 
                         name="call-outline" 
                         size={22} 
-                        color="#667eea" 
+                        color={theme.primary} 
                         style={styles.inputIcon}
                       />
                       <TextInput
@@ -269,12 +274,14 @@ const RegisterScreen = ({ navigation }) => {
                         keyboardType="phone-pad"
                         placeholder="1234567890"
                         maxLength={10}
-                        style={styles.input}
+                        style={[styles.input, { color: theme.text, backgroundColor: theme.card }]}
                         disabled={loading}
+                        textColor={theme.text}
                         theme={{
                           colors: {
-                            primary: '#667eea',
-                            outline: '#d1d5db',
+                            primary: theme.primary,
+                            outline: isDarkMode ? theme.border : '#d1d5db',
+                            background: theme.card,
                           }
                         }}
                       />
@@ -285,7 +292,7 @@ const RegisterScreen = ({ navigation }) => {
                       <Ionicons 
                         name="lock-closed-outline" 
                         size={22} 
-                        color="#667eea" 
+                        color={theme.primary} 
                         style={styles.inputIcon}
                       />
                       <TextInput
@@ -298,15 +305,17 @@ const RegisterScreen = ({ navigation }) => {
                           <TextInput.Icon
                             icon={showPassword ? 'eye-off' : 'eye'}
                             onPress={() => setShowPassword(!showPassword)}
-                            iconColor="#667eea"
+                            iconColor={theme.primary}
                           />
                         }
-                        style={styles.input}
+                        style={[styles.input, { color: theme.text, backgroundColor: theme.card }]}
                         disabled={loading}
+                        textColor={theme.text}
                         theme={{
                           colors: {
-                            primary: '#667eea',
-                            outline: '#d1d5db',
+                            primary: theme.primary,
+                            outline: isDarkMode ? theme.border : '#d1d5db',
+                            background: theme.card,
                           }
                         }}
                       />
@@ -317,7 +326,7 @@ const RegisterScreen = ({ navigation }) => {
                       <Ionicons 
                         name="lock-closed-outline" 
                         size={22} 
-                        color="#667eea" 
+                        color={theme.primary} 
                         style={styles.inputIcon}
                       />
                       <TextInput
@@ -330,15 +339,17 @@ const RegisterScreen = ({ navigation }) => {
                           <TextInput.Icon
                             icon={showConfirmPassword ? 'eye-off' : 'eye'}
                             onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-                            iconColor="#667eea"
+                            iconColor={theme.primary}
                           />
                         }
-                        style={styles.input}
+                        style={[styles.input, { color: theme.text, backgroundColor: theme.card }]}
                         disabled={loading}
+                        textColor={theme.text}
                         theme={{
                           colors: {
-                            primary: '#667eea',
-                            outline: '#d1d5db',
+                            primary: theme.primary,
+                            outline: isDarkMode ? theme.border : '#d1d5db',
+                            background: theme.card,
                           }
                         }}
                       />
@@ -351,7 +362,7 @@ const RegisterScreen = ({ navigation }) => {
                       activeOpacity={0.8}
                     >
                       <LinearGradient
-                        colors={['#3b82f6', '#1d4ed8', '#1e40af']}
+                        colors={isDarkMode ? [theme.primary, theme.secondary] : ['#3b82f6', '#1d4ed8', '#1e40af']}
                         style={styles.registerButton}
                         start={{ x: 0, y: 0 }}
                         end={{ x: 1, y: 0 }}
@@ -377,12 +388,12 @@ const RegisterScreen = ({ navigation }) => {
 
                     {/* Login Link */}
                     <View style={styles.loginContainer}>
-                      <Text style={styles.loginText}>Already have an account? </Text>
+                      <Text style={[styles.loginText, { color: theme.textSecondary }]}>Already have an account? </Text>
                       <TouchableOpacity
                         onPress={navigateToLogin}
                         disabled={loading}
                       >
-                        <Text style={styles.loginLink}>Sign In</Text>
+                        <Text style={[styles.loginLink, { color: theme.primary }]}>Sign In</Text>
                       </TouchableOpacity>
                     </View>
                   </Card.Content>

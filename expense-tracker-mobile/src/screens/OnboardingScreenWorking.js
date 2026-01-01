@@ -12,6 +12,8 @@ import {
   Button,
 } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { theme } from '../utils/theme';
 
 const { width } = Dimensions.get('window');
 
@@ -89,11 +91,13 @@ const OnboardingScreenWorking = ({ navigation }) => {
     }
   };
 
-  const handleGetStarted = () => {
+  const handleGetStarted = async () => {
+    await AsyncStorage.setItem('hasSeenOnboarding', 'true');
     navigation.replace('Login');
   };
 
-  const handleSkip = () => {
+  const handleSkip = async () => {
+    await AsyncStorage.setItem('hasSeenOnboarding', 'true');
     navigation.replace('Login');
   };
 

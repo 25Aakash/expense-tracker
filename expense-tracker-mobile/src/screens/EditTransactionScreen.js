@@ -24,6 +24,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Picker } from '@react-native-picker/picker';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { expenseAPI, incomeAPI, categoryAPI } from '../services/api';
+import { theme } from '../utils/theme';
 
 const EditTransactionScreen = ({ route, navigation }) => {
   const { transaction } = route.params || {};

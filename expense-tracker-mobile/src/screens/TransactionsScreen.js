@@ -31,6 +31,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { expenseAPI, incomeAPI } from '../services/api';
 import { useFocusEffect } from '@react-navigation/native';
 import usePermissions from '../hooks/usePermissions';
+import { theme, isDarkMode } from '../utils/theme';
 
 const TransactionsScreen = ({ navigation }) => {
   const { canEdit, canDelete } = usePermissions();
@@ -274,7 +275,7 @@ const TransactionsScreen = ({ navigation }) => {
       onPress={() => navigation.navigate('EditTransaction', { transaction })}
       activeOpacity={0.7}
     >
-      <Surface style={styles.transactionCard} elevation={2}>
+      <Surface style={[styles.transactionCard, { backgroundColor: theme.card }]} elevation={2}>
         <View style={styles.transactionContent}>
           <View style={styles.transactionLeft}>
             <View style={[
@@ -289,11 +290,11 @@ const TransactionsScreen = ({ navigation }) => {
             </View>
             <View style={styles.transactionDetails}>
               <View style={styles.categoryRow}>
-                <Text style={styles.categoryName}>{transaction.category}</Text>
+                <Text style={[styles.categoryName, { color: theme.text }]}>{transaction.category}</Text>
                 <View style={[
                   styles.methodBadge,
                   {
-                    backgroundColor: transaction.method === 'Bank' ? '#e0e7ff' : '#fef3c7',
+                    backgroundColor: transaction.method === 'Bank' ? (isDarkMode ? '#3730a320' : '#e0e7ff') : (isDarkMode ? '#92400e20' : '#fef3c7'),
                     borderColor: transaction.method === 'Bank' ? '#6366f1' : '#f59e0b'
                   }
                 ]}>
@@ -312,7 +313,7 @@ const TransactionsScreen = ({ navigation }) => {
               </View>
               
               {transaction.note && (
-                <Text style={styles.transactionNote} numberOfLines={1}>
+                <Text style={[styles.transactionNote, { color: theme.textSecondary }]} numberOfLines={1}>
                   {transaction.note}
                 </Text>
               )}
@@ -382,25 +383,26 @@ const TransactionsScreen = ({ navigation }) => {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" />
-        <Text style={styles.loadingText}>Loading transactions...</Text>
+      <View style={[styles.loadingContainer, { backgroundColor: theme.background }]}>
+        <ActivityIndicator size="large" color={theme.primary} />
+        <Text style={[styles.loadingText, { color: theme.text }]}>Loading transactions...</Text>
       </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       {/* Enhanced Filters */}
-      <View style={styles.filtersContainer}>
+      <View style={[styles.filtersContainer, { backgroundColor: theme.card }]}>
         <View style={styles.searchContainer}>
           <Searchbar
             placeholder="Search by category, note, or amount..."
             onChangeText={setSearchQuery}
             value={searchQuery}
-            style={styles.searchBar}
-            iconColor="#6366f1"
-            inputStyle={styles.searchInput}
+            style={[styles.searchBar, { backgroundColor: isDarkMode ? theme.surface : '#f9fafb' }]}
+            iconColor={theme.primary}
+            inputStyle={[styles.searchInput, { color: theme.text }]}
+            placeholderTextColor={theme.textSecondary}
           />
         </View>
         
@@ -413,25 +415,27 @@ const TransactionsScreen = ({ navigation }) => {
         >
           {/* Date Filter */}
           <TouchableOpacity
-            style={[styles.filterPill, styles.dateFilterPill]}
+            style={[styles.filterPill, styles.dateFilterPill, { borderColor: theme.primary, backgroundColor: isDarkMode ? theme.surface : '#ffffff' }]}
             onPress={() => setShowFilterModal(true)}
           >
-            <Ionicons name="calendar-outline" size={16} color="#6366f1" />
-            <Text style={styles.filterPillText}>{dateFilterType}</Text>
-            <Ionicons name="chevron-down" size={14} color="#6366f1" />
+            <Ionicons name="calendar-outline" size={16} color={theme.primary} />
+            <Text style={[styles.filterPillText, { color: theme.primary }]}>{dateFilterType}</Text>
+            <Ionicons name="chevron-down" size={14} color={theme.primary} />
           </TouchableOpacity>
           
           {/* Type Filters */}
           <TouchableOpacity
             style={[
               styles.filterPill,
-              filterType === 'all' && styles.activeFilterPill
+              { backgroundColor: isDarkMode ? theme.surface : '#ffffff', borderColor: theme.border },
+              filterType === 'all' && { backgroundColor: theme.primary + '20', borderColor: theme.primary }
             ]}
             onPress={() => setFilterType('all')}
           >
             <Text style={[
               styles.filterPillText,
-              filterType === 'all' && styles.activeFilterPillText
+              { color: theme.textSecondary },
+              filterType === 'all' && { color: theme.primary }
             ]}>
               All
             </Text>
@@ -440,17 +444,19 @@ const TransactionsScreen = ({ navigation }) => {
           <TouchableOpacity
             style={[
               styles.filterPill,
-              filterType === 'income' && [styles.activeFilterPill, { backgroundColor: '#10b98110', borderColor: '#10b981' }]
+              { backgroundColor: isDarkMode ? theme.surface : '#ffffff', borderColor: theme.border },
+              filterType === 'income' && { backgroundColor: '#10b98110', borderColor: '#10b981' }
             ]}
             onPress={() => setFilterType('income')}
           >
             <Ionicons 
               name="add-circle" 
               size={14} 
-              color={filterType === 'income' ? '#10b981' : '#6b7280'} 
+              color={filterType === 'income' ? '#10b981' : theme.textSecondary} 
             />
             <Text style={[
               styles.filterPillText,
+              { color: theme.textSecondary },
               filterType === 'income' && { color: '#10b981' }
             ]}>
               Income
@@ -460,17 +466,19 @@ const TransactionsScreen = ({ navigation }) => {
           <TouchableOpacity
             style={[
               styles.filterPill,
-              filterType === 'expense' && [styles.activeFilterPill, { backgroundColor: '#ef444410', borderColor: '#ef4444' }]
+              { backgroundColor: isDarkMode ? theme.surface : '#ffffff', borderColor: theme.border },
+              filterType === 'expense' && { backgroundColor: '#ef444410', borderColor: '#ef4444' }
             ]}
             onPress={() => setFilterType('expense')}
           >
             <Ionicons 
               name="remove-circle" 
               size={14} 
-              color={filterType === 'expense' ? '#ef4444' : '#6b7280'} 
+              color={filterType === 'expense' ? '#ef4444' : theme.textSecondary} 
             />
             <Text style={[
               styles.filterPillText,
+              { color: theme.textSecondary },
               filterType === 'expense' && { color: '#ef4444' }
             ]}>
               Expenses
@@ -534,15 +542,15 @@ const TransactionsScreen = ({ navigation }) => {
 
       {/* Quick Stats Bar */}
       {filteredTransactions.length > 0 && (
-        <View style={styles.quickStatsBar}>
+        <View style={[styles.quickStatsBar, { backgroundColor: theme.card }]}>
           <View style={styles.quickStat}>
-            <Text style={styles.quickStatLabel}>Showing</Text>
-            <Text style={styles.quickStatValue}>{filteredTransactions.length}</Text>
+            <Text style={[styles.quickStatLabel, { color: theme.textSecondary }]}>Showing</Text>
+            <Text style={[styles.quickStatValue, { color: theme.text }]}>{filteredTransactions.length}</Text>
           </View>
-          <View style={styles.quickStatDivider} />
+          <View style={[styles.quickStatDivider, { backgroundColor: theme.border }]} />
           <View style={styles.quickStat}>
-            <Text style={styles.quickStatLabel}>Total Amount</Text>
-            <Text style={styles.quickStatValue}>
+            <Text style={[styles.quickStatLabel, { color: theme.textSecondary }]}>Total Amount</Text>
+            <Text style={[styles.quickStatValue, { color: theme.text }]}>
               ₹{filteredTransactions.reduce((sum, t) => sum + t.amount, 0).toLocaleString('en-IN')}
             </Text>
           </View>
@@ -551,24 +559,24 @@ const TransactionsScreen = ({ navigation }) => {
 
       {/* Transactions List */}
       <ScrollView
-        style={styles.transactionsList}
+        style={[styles.transactionsList, { backgroundColor: theme.background }]}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl 
             refreshing={refreshing} 
             onRefresh={onRefresh}
-            colors={['#6366f1']}
-            tintColor="#6366f1"
+            colors={[theme.primary]}
+            tintColor={theme.primary}
           />
         }
       >
         {filteredTransactions.length === 0 ? (
           <View style={styles.emptyContainer}>
             <View style={styles.emptyIconContainer}>
-              <Ionicons name="receipt-outline" size={64} color="#e5e7eb" />
+              <Ionicons name="receipt-outline" size={64} color={theme.border} />
             </View>
-            <Text style={styles.emptyTitle}>No transactions found</Text>
-            <Text style={styles.emptySubText}>
+            <Text style={[styles.emptyTitle, { color: theme.text }]}>No transactions found</Text>
+            <Text style={[styles.emptySubText, { color: theme.textSecondary }]}>
               {searchQuery || filterType !== 'all' || dateFilterType !== 'All'
                 ? 'Try adjusting your filters to see more results'
                 : 'Start by adding your first transaction'
@@ -576,7 +584,7 @@ const TransactionsScreen = ({ navigation }) => {
             </Text>
             {(searchQuery || filterType !== 'all' || dateFilterType !== 'All') && (
               <TouchableOpacity
-                style={styles.clearFiltersButton}
+                style={[styles.clearFiltersButton, { backgroundColor: theme.primary }]}
                 onPress={() => {
                   setSearchQuery('');
                   setFilterType('all');
@@ -602,12 +610,13 @@ const TransactionsScreen = ({ navigation }) => {
           onDismiss={() => setShowFilterModal(false)}
           contentContainerStyle={styles.modalContainer}
         >
-          <Surface style={styles.modalContent} elevation={4}>
+          <Surface style={[styles.modalContent, { backgroundColor: theme.card }]} elevation={4}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Filter by Date</Text>
+              <Text style={[styles.modalTitle, { color: theme.text }]}>Filter by Date</Text>
               <IconButton
                 icon="close"
                 size={20}
+                iconColor={theme.text}
                 onPress={() => setShowFilterModal(false)}
               />
             </View>
@@ -618,7 +627,8 @@ const TransactionsScreen = ({ navigation }) => {
                   key={filter}
                   style={[
                     styles.filterOptionButton,
-                    dateFilterType === filter && styles.filterOptionButtonActive
+                    { backgroundColor: isDarkMode ? theme.surface : '#f9fafb' },
+                    dateFilterType === filter && { backgroundColor: theme.primary + '20', borderColor: theme.primary }
                   ]}
                   onPress={() => handleFilterPress(filter)}
                 >

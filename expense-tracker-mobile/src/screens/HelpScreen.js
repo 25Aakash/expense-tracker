@@ -17,6 +17,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { theme } from '../utils/theme';
 
 const HelpScreen = ({ navigation }) => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -84,7 +85,7 @@ const HelpScreen = ({ navigation }) => {
       id: 10,
       category: 'Technical',
       question: 'I\'m not receiving notifications. How do I fix this?',
-      answer: 'Check your phone\'s notification settings for ExpenseTracker Pro. Also, go to Profile > Settings > Notifications to ensure they\'re enabled in the app.',
+      answer: 'Check your phone\'s notification settings for DailyCashBook. Also, go to Profile > Settings > Notifications to ensure they\'re enabled in the app.',
     },
   ];
 
@@ -105,7 +106,7 @@ const HelpScreen = ({ navigation }) => {
   });
 
   const handleContactSupport = () => {
-    Linking.openURL('mailto:support@expensetracker-pro.com?subject=Help Request');
+    Linking.openURL('mailto:dailycashbook3@gmail.com?subject=Help Request');
   };
 
   const handleViewTutorials = () => {
@@ -285,7 +286,7 @@ const HelpScreen = ({ navigation }) => {
             <View style={styles.contactInfo}>
               <View style={styles.contactInfoItem}>
                 <Ionicons name="mail" size={16} color="#6b7280" />
-                <Text style={styles.contactInfoText}>support@expensetracker-pro.com</Text>
+                <Text style={styles.contactInfoText}>dailycashbook3@gmail.com</Text>
               </View>
               <View style={styles.contactInfoItem}>
                 <Ionicons name="time" size={16} color="#6b7280" />

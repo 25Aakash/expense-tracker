@@ -22,6 +22,7 @@ import { format, parseISO, isToday, isThisWeek, isThisMonth, isThisYear, startOf
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import api from '../services/api';
+import { theme, isDarkMode } from '../utils/theme';
 
 const CategoryTransactionsScreen = () => {
   const route = useRoute();
@@ -149,7 +150,7 @@ const CategoryTransactionsScreen = () => {
   };
 
   const renderTransactionItem = (item) => (
-    <Surface key={item._id} style={styles.transactionItem} elevation={1}>
+    <Surface key={item._id} style={[styles.transactionItem, { backgroundColor: theme.card, borderColor: theme.border }]} elevation={1}>
       <View style={styles.transactionContent}>
         <View style={styles.transactionLeft}>
           <View style={styles.transactionRow}>
@@ -159,17 +160,17 @@ const CategoryTransactionsScreen = () => {
               color={item.color}
               style={styles.transactionIcon}
             />
-            <Text style={styles.transactionDate}>
+            <Text style={[styles.transactionDate, { color: theme.textSecondary }]}>
               {format(parseISO(item.date), 'MMM dd, yyyy')}
             </Text>
           </View>
-          <Text style={styles.transactionNote}>
+          <Text style={[styles.transactionNote, { color: theme.text }]}>
             {item.note || 'No note'}
           </Text>
           <View style={[
             styles.methodBadge, 
             { 
-              backgroundColor: item.method === 'Bank' ? '#e0e7ff' : '#fef3c7',
+              backgroundColor: item.method === 'Bank' ? (isDarkMode ? '#6366f120' : '#e0e7ff') : (isDarkMode ? '#f59e0b20' : '#fef3c7'),
               borderColor: item.method === 'Bank' ? '#6366f1' : '#f59e0b'
             }
           ]}>
@@ -195,11 +196,11 @@ const CategoryTransactionsScreen = () => {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
-        <StatusBar backgroundColor="#6366f1" barStyle="light-content" />
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+        <StatusBar backgroundColor={theme.primary} barStyle="light-content" />
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#6366f1" />
-          <Text style={styles.loadingText}>Loading transactions...</Text>
+          <ActivityIndicator size="large" color={theme.primary} />
+          <Text style={[styles.loadingText, { color: theme.text }]}>Loading transactions...</Text>
         </View>
       </SafeAreaView>
     );
@@ -208,7 +209,7 @@ const CategoryTransactionsScreen = () => {
   const headerColor = categoryType === 'income' ? '#10b981' : '#ef4444';
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <StatusBar backgroundColor={headerColor} barStyle="light-content" />
       
       {/* Header */}
@@ -229,9 +230,9 @@ const CategoryTransactionsScreen = () => {
       </View>
 
       {/* Filter Section */}
-      <View style={styles.filterContainer}>
+      <View style={[styles.filterContainer, { backgroundColor: theme.surface, borderBottomColor: theme.border }]}>
         <TouchableOpacity
-          style={[styles.filterMainButton, { borderColor: headerColor }]}
+          style={[styles.filterMainButton, { borderColor: headerColor, backgroundColor: theme.card }]}
           onPress={() => setShowFilterModal(true)}
         >
           <Ionicons name="filter" size={16} color={headerColor} />
@@ -242,8 +243,8 @@ const CategoryTransactionsScreen = () => {
         </TouchableOpacity>
         
         {filterType === 'Custom Range' && fromDate && toDate && (
-          <View style={styles.dateRangeDisplay}>
-            <Text style={styles.dateRangeText}>
+          <View style={[styles.dateRangeDisplay, { backgroundColor: theme.card }]}>
+            <Text style={[styles.dateRangeText, { color: theme.text }]}>
               {format(fromDate, 'MMM dd')} - {format(toDate, 'MMM dd, yyyy')}
             </Text>
           </View>
@@ -252,14 +253,14 @@ const CategoryTransactionsScreen = () => {
 
       {/* Summary Card */}
       <View style={styles.summaryContainer}>
-        <Surface style={styles.summaryCard} elevation={2}>
+        <Surface style={[styles.summaryCard, { backgroundColor: theme.card }]} elevation={2}>
           <View style={styles.summaryContent}>
             <View style={styles.summaryLeft}>
-              <Text style={styles.summaryLabel}>Total Transactions</Text>
-              <Text style={styles.summaryCount}>{transactions.length}</Text>
+              <Text style={[styles.summaryLabel, { color: theme.textSecondary }]}>Total Transactions</Text>
+              <Text style={[styles.summaryCount, { color: theme.text }]}>{transactions.length}</Text>
             </View>
             <View style={styles.summaryRight}>
-              <Text style={styles.summaryLabel}>Total Amount</Text>
+              <Text style={[styles.summaryLabel, { color: theme.textSecondary }]}>Total Amount</Text>
               <Text style={[styles.summaryAmount, { color: headerColor }]}>
                 {categoryType === 'income' ? '+' : '-'}₹{getTotalAmount().toLocaleString('en-IN')}
               </Text>
@@ -269,12 +270,12 @@ const CategoryTransactionsScreen = () => {
       </View>
 
       {/* Transactions List */}
-      <ScrollView style={styles.transactionsList} showsVerticalScrollIndicator={false}>
+      <ScrollView style={[styles.transactionsList, { backgroundColor: theme.background }]} showsVerticalScrollIndicator={false}>
         {transactions.length === 0 ? (
           <View style={styles.emptyContainer}>
-            <Ionicons name="document-outline" size={48} color="#9ca3af" />
-            <Text style={styles.emptyTitle}>No Transactions</Text>
-            <Text style={styles.emptyText}>
+            <Ionicons name="document-outline" size={48} color={theme.border} />
+            <Text style={[styles.emptyTitle, { color: theme.text }]}>No Transactions</Text>
+            <Text style={[styles.emptyText, { color: theme.textSecondary }]}>
               No transactions found for this category
             </Text>
           </View>
@@ -291,12 +292,13 @@ const CategoryTransactionsScreen = () => {
           onDismiss={() => setShowFilterModal(false)}
           contentContainerStyle={styles.modalContainer}
         >
-          <Surface style={styles.modalContent} elevation={4}>
+          <Surface style={[styles.modalContent, { backgroundColor: theme.card }]} elevation={4}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Filter Transactions</Text>
+              <Text style={[styles.modalTitle, { color: theme.text }]}>Filter Transactions</Text>
               <IconButton
                 icon="close"
                 size={20}
+                iconColor={theme.text}
                 onPress={() => setShowFilterModal(false)}
               />
             </View>
@@ -307,13 +309,15 @@ const CategoryTransactionsScreen = () => {
                   key={filter}
                   style={[
                     styles.filterOptionButton,
-                    filterType === filter && [styles.filterOptionButtonActive, { backgroundColor: `${headerColor}15` }]
+                    { backgroundColor: theme.surface, borderColor: theme.border },
+                    filterType === filter && { backgroundColor: `${headerColor}15`, borderColor: headerColor }
                   ]}
                   onPress={() => handleFilterPress(filter)}
                 >
                   <Text style={[
                     styles.filterOptionText,
-                    filterType === filter && [styles.filterOptionTextActive, { color: headerColor }]
+                    { color: theme.text },
+                    filterType === filter && { color: headerColor }
                   ]}>
                     {filter}
                   </Text>
@@ -334,50 +338,52 @@ const CategoryTransactionsScreen = () => {
           onDismiss={() => setShowDateModal(false)}
           contentContainerStyle={styles.modalContainer}
         >
-          <Surface style={styles.modalContent} elevation={4}>
+          <Surface style={[styles.modalContent, { backgroundColor: theme.card }]} elevation={4}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Select Date Range</Text>
+              <Text style={[styles.modalTitle, { color: theme.text }]}>Select Date Range</Text>
               <IconButton
                 icon="close"
                 size={20}
+                iconColor={theme.text}
                 onPress={() => setShowDateModal(false)}
               />
             </View>
             
             <View style={styles.modalBody}>
               <View style={styles.dateInputContainer}>
-                <Text style={styles.dateLabel}>From Date</Text>
+                <Text style={[styles.dateLabel, { color: theme.textSecondary }]}>From Date</Text>
                 <TouchableOpacity
-                  style={styles.datePickerButton}
+                  style={[styles.datePickerButton, { backgroundColor: theme.surface, borderColor: theme.border }]}
                   onPress={() => setShowFromDatePicker(true)}
                 >
-                  <Ionicons name="calendar-outline" size={20} color="#6366f1" />
-                  <Text style={styles.datePickerText}>
+                  <Ionicons name="calendar-outline" size={20} color={headerColor} />
+                  <Text style={[styles.datePickerText, { color: theme.text }]}>
                     {format(fromDate, 'MMM dd, yyyy')}
                   </Text>
-                  <Ionicons name="chevron-down" size={16} color="#6b7280" />
+                  <Ionicons name="chevron-down" size={16} color={theme.textSecondary} />
                 </TouchableOpacity>
               </View>
               
               <View style={styles.dateInputContainer}>
-                <Text style={styles.dateLabel}>To Date</Text>
+                <Text style={[styles.dateLabel, { color: theme.textSecondary }]}>To Date</Text>
                 <TouchableOpacity
-                  style={styles.datePickerButton}
+                  style={[styles.datePickerButton, { backgroundColor: theme.surface, borderColor: theme.border }]}
                   onPress={() => setShowToDatePicker(true)}
                 >
-                  <Ionicons name="calendar-outline" size={20} color="#6366f1" />
-                  <Text style={styles.datePickerText}>
+                  <Ionicons name="calendar-outline" size={20} color={headerColor} />
+                  <Text style={[styles.datePickerText, { color: theme.text }]}>
                     {format(toDate, 'MMM dd, yyyy')}
                   </Text>
-                  <Ionicons name="chevron-down" size={16} color="#6b7280" />
+                  <Ionicons name="chevron-down" size={16} color={theme.textSecondary} />
                 </TouchableOpacity>
               </View>
               
               <View style={styles.modalActions}>
                 <Button 
                   mode="outlined" 
+                  textColor={theme.text}
                   onPress={() => setShowDateModal(false)}
-                  style={styles.modalButton}
+                  style={[styles.modalButton, { borderColor: theme.border }]}
                 >
                   Cancel
                 </Button>
