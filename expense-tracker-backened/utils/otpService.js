@@ -3,7 +3,7 @@ const nodemailer = require('nodemailer');
 const axios = require('axios');
 // Send OTP via SMS using STPL API
 async function sendOtpSms(mobile, otp) {
-  const msg = `Dear user, ${otp} is your OTP to login to Riddhi Siddhi Trading Co. mobile app. This OTP is valid for 15 minutes. Do not share it with anyone. Login at http://riddhisiddhitrading.co.in/index.html`;
+  const msg = `Dear user, ${otp} is your OTP to verify your DailyCashBook account. This OTP is valid for 5 minutes. Do not share it with anyone. - DailyCashBook Team`;
   const url = `https://smsnotify.one/SMSApi/send`;
   const params = {
     userid: 'riddhisiddhi',
