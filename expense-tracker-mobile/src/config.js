@@ -35,15 +35,8 @@ function resolveBaseUrl() {
   const envUrl = process.env.EXPO_PUBLIC_API_URL;
   if (envUrl) return sanitize(envUrl);
 
-  // 2. Fallback to production URL
+  // 2. Fallback to production URL on Render
   return 'https://expense-tracker-hirq.onrender.com/api';
-
-  // 3. Try to derive from Expo host (LAN / tunnel) - only for development
-  // const expoDerived = deriveFromExpoHost();
-  // if (expoDerived) return expoDerived;
-
-  // 4. Platform default mapping - only for local development
-  // return platformDefault();
 }
 
 export const API_BASE_URL = resolveBaseUrl();

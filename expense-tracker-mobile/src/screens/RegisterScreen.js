@@ -171,7 +171,7 @@ const RegisterScreen = ({ navigation }) => {
                 >
                   <Ionicons name="wallet" size={48} color="white" />
                 </LinearGradient>
-                <Text style={[styles.appName, { color: theme.text }]}>ExpenseTracker</Text>
+                <Text style={[styles.appName, { color: theme.text }]}>DailyCashBook</Text>
                 <Text style={[styles.tagline, { color: theme.textSecondary }]}>Smart Expense Management</Text>
               </Animated.View>
 

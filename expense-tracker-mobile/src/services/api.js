@@ -7,7 +7,7 @@ console.log('API Base URL:', API_BASE_URL); // Debug log
 // Create axios instance
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 15000, // Increased timeout to 15 seconds
+  timeout: 60000, // Increased timeout to 60 seconds for slow SMS/email sending
   headers: {
     'Content-Type': 'application/json',
   },

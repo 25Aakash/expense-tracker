@@ -76,6 +76,8 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     try {
       setLoading(true);
+      console.log('Registration attempt with data:', { ...userData, password: '[HIDDEN]' }); // Debug log
+      
       // Add mobile field as required by backend (you can make this configurable)
       const registrationData = {
         ...userData,
@@ -93,9 +95,25 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       console.error('Register error:', error);
+      console.error('Register error response:', error.response?.data);
+      console.error('Register error status:', error.response?.status);
+      console.error('Register error message:', error.message);
+      
+      let errorMessage = 'Registration failed';
+      
+      if (error.code === 'ECONNABORTED') {
+        errorMessage = 'Request timeout. Please check your internet connection and try again.';
+      } else if (error.message === 'Network Error') {
+        errorMessage = 'Network error. Please check your internet connection and ensure the server is running.';
+      } else if (error.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      }
+      
       return { 
         success: false, 
-        message: error.response?.data?.error || error.response?.data?.message || 'Registration failed' 
+        message: errorMessage
       };
     } finally {
       setLoading(false);

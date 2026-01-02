@@ -111,7 +111,7 @@ const HelpScreen = ({ navigation }) => {
 
   const handleViewTutorials = () => {
     // In a real app, this might open tutorial videos or walkthroughs
-    Linking.openURL('https://expensetracker-pro.com/tutorials');
+    Linking.openURL('mailto:dailycashbook3@gmail.com?subject=Help Center Inquiry');
   };
 
   return (
