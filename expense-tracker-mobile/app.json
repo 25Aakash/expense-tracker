@@ -14,8 +14,8 @@
       "android"
     ],
     "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
+      "image": "./assets/splash.jpg",
+      "resizeMode": "cover",
       "backgroundColor": "#6366f1"
     },
     "assetBundlePatterns": [
