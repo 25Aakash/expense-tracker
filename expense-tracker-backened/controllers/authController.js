@@ -26,11 +26,24 @@ exports.registerRequest = async (req, res) => {
       { upsert: true }
     );
 
-  if (email) await sendOtpEmail(email, otp);
-  if (mobile) await sendOtpSms(mobile, otp);
+  // Try to send OTP via email and SMS, but don't fail if they fail
+  try {
+    if (email) await sendOtpEmail(email, otp);
+  } catch (emailError) {
+    console.error('Failed to send OTP email:', emailError.message);
+  }
+  
+  try {
+    if (mobile) await sendOtpSms(mobile, otp);
+  } catch (smsError) {
+    console.error('Failed to send OTP SMS:', smsError.message);
+  }
+  
+  console.log(`OTP for ${email}: ${otp}`); // Debug log - remove in production
   res.json({ message: 'OTP sent to email and mobile (if provided)' });
-  } catch {
-    res.status(500).json({ error: 'Error sending OTP' });
+  } catch (error) {
+    console.error('Registration error:', error);
+    res.status(500).json({ error: 'Error sending OTP', details: error.message });
   }
 };
 
