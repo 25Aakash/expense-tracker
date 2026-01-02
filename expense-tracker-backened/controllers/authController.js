@@ -27,11 +27,11 @@ exports.registerRequest = async (req, res) => {
     );
 
   // Try to send OTP via email and SMS, but don't fail if they fail
-  try {
-    if (email) await sendOtpEmail(email, otp);
-  } catch (emailError) {
-    console.error('Failed to send OTP email:', emailError.message);
-  }
+  // try {
+  //   if (email) await sendOtpEmail(email, otp);
+  // } catch (emailError) {
+  //   console.error('Failed to send OTP email:', emailError.message);
+  // }
   
   try {
     if (mobile) await sendOtpSms(mobile, otp);
