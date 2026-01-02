@@ -136,7 +136,7 @@ const LoginScreen = ({ navigation }) => {
               <View style={[styles.logoCircle, { backgroundColor: isDarkMode ? theme.card : '#ffffff' }]}>
                 <Ionicons name="wallet" size={48} color={theme.primary} />
               </View>
-              <Text style={[styles.appName, { color: theme.text }]}>ExpenseTracker</Text>
+              <Text style={[styles.appName, { color: theme.text }]}>DailyCashBook</Text>
             </Animated.View>
 
             {/* Header */}
@@ -151,7 +151,7 @@ const LoginScreen = ({ navigation }) => {
             >
               <Title style={[styles.title, { color: theme.text }]}>Welcome Back!</Title>
               <Paragraph style={[styles.subtitle, { color: theme.textSecondary }]}>
-                Sign in to your expense tracker account
+                Sign in to your DailyCashBook account
               </Paragraph>
             </Animated.View>
 

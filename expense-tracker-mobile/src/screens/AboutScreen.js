@@ -85,7 +85,7 @@ const AboutScreen = ({ navigation }) => {
 
             <TouchableOpacity 
               style={styles.actionItem} 
-              onPress={() => openURL('https://expensetracker-pro.com/help')}
+              onPress={() => openURL('https://github.com/25Aakash/dailycashbook/blob/main/HELP_CENTER.md')}
             >
               <View style={styles.actionLeft}>
                 <Ionicons name="help-circle" size={20} color="#10b981" />
@@ -154,7 +154,7 @@ const AboutScreen = ({ navigation }) => {
 
             <TouchableOpacity 
               style={styles.actionItem} 
-              onPress={() => openURL('https://expensetracker-pro.com/licenses')}
+              onPress={() => openURL('https://github.com/25Aakash/dailycashbook/blob/main/LICENSES.md')}
             >
               <View style={styles.actionLeft}>
                 <Ionicons name="code" size={20} color="#6b7280" />
