@@ -26,21 +26,57 @@ exports.registerRequest = async (req, res) => {
       { upsert: true }
     );
 
-  // Try to send OTP via email and SMS, but don't fail if they fail
-  // try {
-  //   if (email) await sendOtpEmail(email, otp);
-  // } catch (emailError) {
-  //   console.error('Failed to send OTP email:', emailError.message);
-  // }
+  // Try to send OTP via SMS and Email
+  let smsSent = false;
+  let emailSent = false;
   
+  // Try SMS first
   try {
-    if (mobile) await sendOtpSms(mobile, otp);
-  } catch (smsError) {
-    console.error('Failed to send OTP SMS:', smsError.message);
+    if (mobile) {
+      await sendOtpSms(mobile, otp);
+      smsSent = true;
+      console.log(`OTP SMS sent successfully to ${mobile.slice(0, 3)}****${mobile.slice(-3)}`);
+    }
+  } catch (smsErr) {
+    console.error('Failed to send OTP SMS:', smsErr.message);
+  }
+  
+  // Try Email as backup (or primary if SMS fails)
+  try {
+    if (email) {
+      await sendOtpEmail(email, otp);
+      emailSent = true;
+      console.log(`OTP Email sent successfully to ${email}`);
+    }
+  } catch (emailErr) {
+    console.error('Failed to send OTP Email:', emailErr.message);
   }
   
   console.log(`OTP for ${email}: ${otp}`); // Debug log - remove in production
-  res.json({ message: 'OTP sent to email and mobile (if provided)' });
+  
+  // Provide detailed feedback to the user
+  if (smsSent || emailSent) {
+    const channels = [];
+    if (smsSent) channels.push('mobile');
+    if (emailSent) channels.push('email');
+    
+    res.json({ 
+      message: `OTP sent to your ${channels.join(' and ')}`,
+      smsSent,
+      emailSent
+    });
+  } else {
+    // Both failed - still return success but with warning
+    console.warn(`OTP delivery failed for ${email}, OTP: ${otp}`);
+    res.json({ 
+      message: 'Registration initiated. If you do not receive OTP, please check your contact details or contact support.',
+      smsSent: false,
+      emailSent: false,
+      warning: 'OTP delivery may be delayed. Please wait a few minutes.',
+      // In development, you might want to include the OTP for testing
+      ...(process.env.NODE_ENV === 'development' && { debugOtp: otp })
+    });
+  }
   } catch (error) {
     console.error('Registration error:', error);
     res.status(500).json({ error: 'Error sending OTP', details: error.message });
@@ -61,10 +97,45 @@ exports.resendOtp = async (req, res) => {
     record.attempts = 0;
     await record.save();
 
-  if (email) await sendOtpEmail(email, record.code);
-  if (record.formData?.mobile) await sendOtpSms(record.formData.mobile, record.code);
-  res.json({ message: 'New OTP sent to email and mobile (if provided)' });
-  } catch {
+    let smsSent = false;
+    let emailSent = false;
+    
+    // Try to send OTP via SMS
+    try {
+      if (record.formData?.mobile) {
+        await sendOtpSms(record.formData.mobile, record.code);
+        smsSent = true;
+      }
+    } catch (smsErr) {
+      console.error('Failed to resend OTP SMS:', smsErr.message);
+    }
+    
+    // Try to send OTP via Email
+    try {
+      if (email) {
+        await sendOtpEmail(email, record.code);
+        emailSent = true;
+      }
+    } catch (emailErr) {
+      console.error('Failed to resend OTP Email:', emailErr.message);
+    }
+    
+    console.log(`Resent OTP for ${email}: ${record.code}`); // Debug log
+    
+    const channels = [];
+    if (smsSent) channels.push('mobile');
+    if (emailSent) channels.push('email');
+    
+    res.json({ 
+      message: channels.length > 0 
+        ? `New OTP sent to your ${channels.join(' and ')}` 
+        : 'OTP resend attempted. Please wait a few minutes.',
+      smsSent,
+      emailSent,
+      ...(process.env.NODE_ENV === 'development' && { debugOtp: record.code })
+    });
+  } catch (error) {
+    console.error('Resend OTP error:', error);
     res.status(500).json({ error: 'Failed to resend OTP' });
   }
 };
