@@ -18,21 +18,27 @@ async function sendOtpSms(mobile, otp) {
   }
   
   const msg = `Dear user, ${otp} is your OTP to verify your DailyCashBook account. This OTP is valid for 5 minutes. Do not share it with anyone. - DailyCashBook Team`;
-  const url = `https://smsnotify.one/SMSApi/send`;
-  const params = {
+  
+  // Build URL with query string directly (like the working API example)
+  const baseUrl = 'https://smsnotify.one/SMSApi/send';
+  const queryParams = new URLSearchParams({
     userid: smsUserId,
     password: smsPassword,
     sendMethod: 'quick',
     mobile: formattedMobile,
-    msg,
+    msg: msg,
     senderid: smsSenderId,
     msgType: 'text',
-    format: 'text', // Use text format as per working API
-  };
+    format: 'text'
+  });
+  
+  const fullUrl = `${baseUrl}?${queryParams.toString()}`;
   
   try {
     console.log(`Attempting to send OTP SMS to ${formattedMobile.slice(0, 3)}****${formattedMobile.slice(-3)}`);
-    const response = await axios.get(url, { params, timeout: 30000 });
+    console.log('SMS API URL (masked):', fullUrl.replace(smsPassword, '***'));
+    
+    const response = await axios.get(fullUrl, { timeout: 30000 });
     console.log('SMS API Response:', response.data);
     
     // Parse the SMS API response - format=text returns string like:
