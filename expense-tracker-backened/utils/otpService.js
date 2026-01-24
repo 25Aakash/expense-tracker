@@ -27,23 +27,35 @@ async function sendOtpSms(mobile, otp) {
     msg,
     senderid: smsSenderId,
     msgType: 'text',
-    format: 'json', // Changed to JSON to better parse response
+    format: 'text', // Use text format as per working API
   };
   
   try {
     console.log(`Attempting to send OTP SMS to ${formattedMobile.slice(0, 3)}****${formattedMobile.slice(-3)}`);
     const response = await axios.get(url, { params, timeout: 30000 });
-    console.log('SMS API Response:', JSON.stringify(response.data));
+    console.log('SMS API Response:', response.data);
     
-    // Check for common error responses from SMS API
-    const responseData = typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
-    if (responseData.toLowerCase().includes('error') || 
-        responseData.toLowerCase().includes('failed') ||
-        responseData.toLowerCase().includes('invalid')) {
+    // Parse the SMS API response - format=text returns string like:
+    // "SimpleMessageSuccessResponse [status=success, statusCode=200, reason=success, ...]"
+    const responseData = typeof response.data === 'string' ? response.data : String(response.data);
+    
+    // Check for success indicators
+    const isSuccess = responseData.includes('status=success') || 
+                      responseData.includes('statusCode=200') ||
+                      responseData.includes('reason=success');
+    
+    // Check for actual failure indicators
+    const isError = responseData.includes('status=failed') || 
+                    responseData.includes('status=error') ||
+                    responseData.includes('statusCode=4') ||  // 4xx errors
+                    responseData.includes('statusCode=5');    // 5xx errors
+    
+    if (isError && !isSuccess) {
       console.error('SMS API returned error:', responseData);
       throw new Error(`SMS API Error: ${responseData}`);
     }
     
+    console.log('SMS sent successfully!');
     return { success: true, data: response.data };
   } catch (error) {
     console.error('Error sending OTP SMS:', error.response?.data || error.message);
