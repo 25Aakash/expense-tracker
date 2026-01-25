@@ -19,20 +19,9 @@ async function sendOtpSms(mobile, otp) {
   
   const msg = `Dear user, ${otp} is your OTP to verify your DailyCashBook account. This OTP is valid for 5 minutes. Do not share it with anyone. - DailyCashBook Team`;
   
-  // Build URL with query string directly (like the working API example)
+  // Build URL manually with encodeURIComponent (URLSearchParams uses + for spaces which this API doesn't handle)
   const baseUrl = 'https://smsnotify.one/SMSApi/send';
-  const queryParams = new URLSearchParams({
-    userid: smsUserId,
-    password: smsPassword,
-    sendMethod: 'quick',
-    mobile: formattedMobile,
-    msg: msg,
-    senderid: smsSenderId,
-    msgType: 'text',
-    format: 'text'
-  });
-  
-  const fullUrl = `${baseUrl}?${queryParams.toString()}`;
+  const fullUrl = `${baseUrl}?userid=${encodeURIComponent(smsUserId)}&password=${encodeURIComponent(smsPassword)}&sendMethod=quick&mobile=${formattedMobile}&msg=${encodeURIComponent(msg)}&senderid=${encodeURIComponent(smsSenderId)}&msgType=text&format=text`;
   
   try {
     console.log(`Attempting to send OTP SMS to ${formattedMobile.slice(0, 3)}****${formattedMobile.slice(-3)}`);
