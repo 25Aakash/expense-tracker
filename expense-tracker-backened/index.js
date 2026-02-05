@@ -28,6 +28,9 @@ const rateLimiter    = require('./middleware/rateLimiter'); // limits OTP + auth
 const app  = express();
 const PORT = process.env.PORT || 5000;
 
+// Trust proxy for cloud platforms (Render, Heroku, etc.)
+app.set('trust proxy', 1);
+
 //-------------------------------------------------
 // Mandatory config validation (fail fast)
 //-------------------------------------------------
