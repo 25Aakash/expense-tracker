@@ -17,11 +17,14 @@ async function sendOtpSms(mobile, otp) {
     throw new Error('Invalid mobile number format');
   }
   
-  const msg = `Dear user, ${otp} is your OTP to verify your DailyCashBook account. This OTP is valid for 5 minutes. Do not share it with anyone. - DailyCashBook Team`;
+  // Use approved template format (match the working Riddhi Siddhi template structure)
+  const msg = `Dear user, ${otp} is your OTP to login to Riddhi Siddhi Trading Co. mobile app. This OTP is valid for 15 minutes. Do not share it with anyone. Login at http://riddhisiddhitrading.co.in/index.html`;
   
-  // Build URL manually with encodeURIComponent (URLSearchParams uses + for spaces which this API doesn't handle)
+  // Build URL manually - Don't encode the entire message, just spaces and special chars
   const baseUrl = 'https://smsnotify.one/SMSApi/send';
-  const fullUrl = `${baseUrl}?userid=${encodeURIComponent(smsUserId)}&password=${encodeURIComponent(smsPassword)}&sendMethod=quick&mobile=${formattedMobile}&msg=${encodeURIComponent(msg)}&senderid=${encodeURIComponent(smsSenderId)}&msgType=text&format=text`;
+  // Encode only spaces to %20, keep commas and other chars as-is to match approved template
+  const encodedMsg = msg.replace(/ /g, '%20');
+  const fullUrl = `${baseUrl}?userid=${smsUserId}&password=${smsPassword}&sendMethod=quick&mobile=${formattedMobile}&msg=${encodedMsg}&senderid=${smsSenderId}&msgType=text&format=text`;
   
   try {
     console.log(`Attempting to send OTP SMS to ${formattedMobile.slice(0, 3)}****${formattedMobile.slice(-3)}`);

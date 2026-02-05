@@ -17,11 +17,12 @@ exports.login = Joi.object({
 
 // ── OTP-based password reset ─────────────────────────────────
 exports.requestReset = Joi.object({
-  email: Joi.string().email().required(),
+  identifier: Joi.string().required(), // email or mobile number
 });
 
 exports.confirmReset = Joi.object({
-  email:       Joi.string().email().required(),
+  identifier:  Joi.string().required(), // email or mobile number
+  email:       Joi.string().email().optional(), // legacy support
   otp:         Joi.string().length(6).required(),
   newPassword: Joi.string().min(8).required(),
 });

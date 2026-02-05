@@ -26,11 +26,9 @@ exports.registerRequest = async (req, res) => {
       { upsert: true }
     );
 
-  // Try to send OTP via SMS and Email
+  // Send OTP via SMS only (faster than email)
   let smsSent = false;
-  let emailSent = false;
   
-  // Try SMS first
   try {
     if (mobile) {
       await sendOtpSms(mobile, otp);
@@ -41,35 +39,20 @@ exports.registerRequest = async (req, res) => {
     console.error('Failed to send OTP SMS:', smsErr.message);
   }
   
-  // Try Email as backup (or primary if SMS fails)
-  try {
-    if (email) {
-      await sendOtpEmail(email, otp);
-      emailSent = true;
-      console.log(`OTP Email sent successfully to ${email}`);
-    }
-  } catch (emailErr) {
-    console.error('Failed to send OTP Email:', emailErr.message);
-  }
-  
   console.log(`OTP for ${email}: ${otp}`); // Debug log - remove in production
   
-  // Provide detailed feedback to the user
-  if (smsSent || emailSent) {
-    const channels = [];
-    if (smsSent) channels.push('mobile');
-    if (emailSent) channels.push('email');
-    
+  // Provide feedback to the user
+  if (smsSent) {
     res.json({ 
-      message: `OTP sent to your ${channels.join(' and ')}`,
-      smsSent,
-      emailSent
+      message: 'OTP sent to your mobile',
+      smsSent: true,
+      emailSent: false
     });
   } else {
-    // Both failed - still return success but with warning
+    // SMS failed - still return success but with warning
     console.warn(`OTP delivery failed for ${email}, OTP: ${otp}`);
     res.json({ 
-      message: 'Registration initiated. If you do not receive OTP, please check your contact details or contact support.',
+      message: 'Registration initiated. If you do not receive OTP, please contact support.',
       smsSent: false,
       emailSent: false,
       warning: 'OTP delivery may be delayed. Please wait a few minutes.',
@@ -229,32 +212,126 @@ exports.login = async (req, res) => {
 };
 
 //─────────────────────────────────────────────────────────────
-//  Forgot-password – request OTP
+//  Forgot-password – request OTP (supports email or mobile)
 //─────────────────────────────────────────────────────────────
 exports.requestReset = async (req, res) => {
-  const { email } = req.body;
+  console.log('requestReset called with body:', req.body);
+  const { identifier } = req.body; // Can be email or mobile
+  
+  if (!identifier) {
+    return res.status(400).json({ error: 'Email or mobile number is required' });
+  }
 
-  // avoid user-enumeration leaks
-  const user = await User.findOne({ email });
+  // Determine if identifier is email or mobile
+  const isEmail = identifier.includes('@');
+  const isMobile = /^[0-9]{10}$/.test(identifier.replace(/\D/g, '').slice(-10));
+  
+  let user;
+  let lookupKey; // Key for OTP record lookup
+  
+  if (isEmail) {
+    user = await User.findOne({ email: identifier });
+    lookupKey = { email: identifier };
+  } else if (isMobile) {
+    const formattedMobile = identifier.replace(/\D/g, '').slice(-10);
+    user = await User.findOne({ mobile: formattedMobile });
+    lookupKey = { mobile: formattedMobile };
+  } else {
+    return res.json({ message: 'OTP sent if account exists' }); // Invalid format, but don't reveal
+  }
+
+  // Avoid user-enumeration leaks
   if (!user) return res.json({ message: 'OTP sent if account exists' });
 
   const otp = generateOTP();
-  await Otp.findOneAndUpdate(
-    { email },
-    { code: otp, expires: Date.now() + 5 * 60 * 1000, attempts: 0, formData: null },
-    { upsert: true }
-  );
+  
+  // Delete any existing OTP records for this user (to avoid duplicate key errors)
+  if (isEmail) {
+    await Otp.deleteMany({ email: identifier });
+  } else {
+    const formattedMobile = identifier.replace(/\D/g, '').slice(-10);
+    await Otp.deleteMany({ mobile: formattedMobile });
+  }
+  
+  // Create new OTP record with only the lookup field set
+  const otpData = {
+    code: otp,
+    expires: Date.now() + 5 * 60 * 1000,
+    attempts: 0,
+    formData: { 
+      resetFor: isEmail ? 'email' : 'mobile', 
+      identifier: isEmail ? identifier : user.mobile,
+      userEmail: user.email // Store for later user lookup
+    }
+  };
+  
+  // Only set the field we're using for lookup (to avoid unique index conflicts)
+  if (isEmail) {
+    otpData.email = identifier;
+  } else {
+    otpData.mobile = user.mobile;
+  }
+  
+  await Otp.create(otpData);
 
-  await sendOtpEmail(email, otp);
-  res.json({ message: 'OTP sent if account exists' });
+  let smsSent = false;
+  let emailSent = false;
+
+  // Send OTP via the channel user specified
+  if (isEmail) {
+    try {
+      await sendOtpEmail(identifier, otp);
+      emailSent = true;
+    } catch (err) {
+      console.error('Failed to send reset OTP email:', err.message);
+    }
+  } else {
+    // Send via SMS
+    try {
+      await sendOtpSms(user.mobile, otp);
+      smsSent = true;
+    } catch (err) {
+      console.error('Failed to send reset OTP SMS:', err.message);
+    }
+  }
+
+  console.log(`Password reset OTP for ${isEmail ? 'email' : 'mobile'} ${identifier}: ${otp}`);
+  
+  res.json({ 
+    message: 'OTP sent if account exists',
+    channel: isEmail ? 'email' : 'sms',
+    smsSent,
+    emailSent
+  });
 };
 
 //─────────────────────────────────────────────────────────────
-//  Forgot-password – confirm OTP & set new password
+//  Forgot-password – confirm OTP & set new password (supports email or mobile)
 //─────────────────────────────────────────────────────────────
 exports.confirmReset = async (req, res) => {
-  const { email, otp, newPassword } = req.body;
-  const record = await Otp.findOne({ email });
+  const { identifier, email, otp, newPassword } = req.body;
+  
+  // Support both 'identifier' (new) and 'email' (legacy) for backward compatibility
+  const lookupValue = identifier || email;
+  
+  if (!lookupValue) {
+    return res.status(400).json({ error: 'Email or mobile number is required' });
+  }
+  
+  // Determine if it's email or mobile
+  const isEmail = lookupValue.includes('@');
+  let record;
+  
+  if (isEmail) {
+    record = await Otp.findOne({ email: lookupValue });
+  } else {
+    const formattedMobile = lookupValue.replace(/\D/g, '').slice(-10);
+    record = await Otp.findOne({ mobile: formattedMobile });
+    // If not found by mobile field, try by email stored in record
+    if (!record) {
+      record = await Otp.findOne({ 'formData.identifier': formattedMobile });
+    }
+  }
 
   if (!record || Date.now() > record.expires)
     return res.status(400).json({ error: 'Invalid or expired OTP' });
@@ -270,8 +347,16 @@ exports.confirmReset = async (req, res) => {
     return res.status(400).json({ error: 'Incorrect OTP' });
   }
 
-  // set new password (will be hashed by pre-save when saving user)
-  const user = await User.findOne({ email }).select('+password');
+  // Find user by the email stored in formData or by email/mobile
+  let user;
+  if (record.email) {
+    user = await User.findOne({ email: record.email }).select('+password');
+  } else if (record.formData?.userEmail) {
+    user = await User.findOne({ email: record.formData.userEmail }).select('+password');
+  } else if (record.mobile) {
+    user = await User.findOne({ mobile: record.mobile }).select('+password');
+  }
+  
   if (!user) return res.status(404).json({ error: 'User not found' });
   user.password = newPassword;
   await user.save();
