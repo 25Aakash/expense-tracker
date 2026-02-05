@@ -7,6 +7,10 @@ export default ({ config }) => {
     name: config.name || 'ExpenseTracker',
     slug: config.slug || 'expense-tracker-mobile',
     version: config.version || '1.0.0',
+    android: {
+      ...config.android,
+      versionCode: 8,
+    },
     extra: {
       ...config.extra,
       // Set the production API URL
