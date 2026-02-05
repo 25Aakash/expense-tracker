@@ -35,7 +35,7 @@
         "backgroundColor": "#6366f1"
       },
       "package": "com.expensetracker.pro",
-      "versionCode": 1,
+      "versionCode": 8,
       "permissions": [],
       "edgeToEdgeEnabled": true
     },
@@ -58,6 +58,10 @@
     "owner": "kaakash",
     "runtimeVersion": {
       "policy": "appVersion"
+    },
+    "updates": {
+      "enabled": true,
+      "url": "https://u.expo.dev/a878dfa8-9c1b-4119-8893-6b8c216ddfa2"
     }
   }
 }

@@ -24,6 +24,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Updates from 'expo-updates';
 import { useAuth } from '../context/AuthContext';
 import { theme, isDarkMode } from '../utils/theme';
 
@@ -32,6 +33,7 @@ const LoginScreen = ({ navigation }) => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [checkingUpdate, setCheckingUpdate] = useState(false);
   const { login, loading } = useAuth();
 
   // Animation values
@@ -110,6 +112,51 @@ const LoginScreen = ({ navigation }) => {
 
   const navigateToRegister = () => {
     navigation.navigate('Register');
+  };
+
+  const checkForUpdates = async () => {
+    try {
+      setCheckingUpdate(true);
+      
+      // Check if running in Expo Go (updates not supported)
+      if (!Updates.isEnabled) {
+        Alert.alert('Info', 'Updates are not available in development mode.');
+        setCheckingUpdate(false);
+        return;
+      }
+
+      const update = await Updates.checkForUpdateAsync();
+      
+      if (update.isAvailable) {
+        Alert.alert(
+          'Update Available',
+          'A new version is available. Would you like to download and restart?',
+          [
+            { text: 'Later', style: 'cancel', onPress: () => setCheckingUpdate(false) },
+            {
+              text: 'Update',
+              onPress: async () => {
+                try {
+                  await Updates.fetchUpdateAsync();
+                  Alert.alert('Update Ready', 'The app will now restart to apply the update.');
+                  await Updates.reloadAsync();
+                } catch (error) {
+                  Alert.alert('Update Failed', 'Could not download update. Please try again later.');
+                  setCheckingUpdate(false);
+                }
+              },
+            },
+          ]
+        );
+      } else {
+        Alert.alert('Up to Date', 'You are already using the latest version.');
+        setCheckingUpdate(false);
+      }
+    } catch (error) {
+      console.error('Error checking for updates:', error);
+      Alert.alert('Error', 'Could not check for updates. Please try again later.');
+      setCheckingUpdate(false);
+    }
   };
 
   return (
@@ -267,6 +314,22 @@ const LoginScreen = ({ navigation }) => {
                       <Text style={[styles.registerLink, { color: theme.primary }]}>Sign Up</Text>
                     </TouchableOpacity>
                   </View>
+
+                  {/* Check for Updates Button */}
+                  <TouchableOpacity 
+                    onPress={checkForUpdates} 
+                    disabled={loading || checkingUpdate}
+                    style={styles.updateButton}
+                  >
+                    {checkingUpdate ? (
+                      <ActivityIndicator size="small" color={theme.primary} />
+                    ) : (
+                      <>
+                        <Ionicons name="refresh-outline" size={16} color={theme.primary} />
+                        <Text style={[styles.updateButtonText, { color: theme.primary }]}> Check for Updates</Text>
+                      </>
+                    )}
+                  </TouchableOpacity>
                 </Card.Content>
               </Card>
             </Animated.View>
@@ -422,6 +485,18 @@ const styles = StyleSheet.create({
   rememberMeText: {
     fontSize: 14,
     color: '#6b7280',
+  },
+  updateButton: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 16,
+    paddingVertical: 8,
+  },
+  updateButtonText: {
+    fontSize: 13,
+    fontWeight: '500',
+    marginLeft: 4,
   },
 });
 
