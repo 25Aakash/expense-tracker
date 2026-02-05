@@ -9,7 +9,7 @@ export default ({ config }) => {
     version: config.version || '1.0.0',
     android: {
       ...config.android,
-      versionCode: 8,
+      versionCode: 9,  // Incremented to 9 since 7 and 8 failed
     },
     extra: {
       ...config.extra,
