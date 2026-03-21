@@ -31,7 +31,7 @@ export const AuthProvider = ({ children }) => {
         setUser(JSON.parse(storedUser));
       }
     } catch (error) {
-      console.error('Error loading stored auth:', error);
+      // Silently fail — user will be prompted to log in
     } finally {
       setLoading(false);
     }
@@ -40,10 +40,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       setLoading(true);
-      console.log('Attempting login with:', { email }); // Debug log
-      
       const response = await authAPI.login(email, password);
-      console.log('Login response:', response.data); // Debug log
       
       // Backend returns { token, user, permissions } directly on success
       if (response.data.token && response.data.user) {
@@ -60,10 +57,6 @@ export const AuthProvider = ({ children }) => {
         return { success: false, message: response.data.message || 'Login failed' };
       }
     } catch (error) {
-      console.error('Login error details:', error.response?.data); // Enhanced debug log
-      console.error('Login error status:', error.response?.status); // Status code
-      console.error('Login error message:', error.message); // Error message
-      
       return { 
         success: false, 
         message: error.response?.data?.error || error.response?.data?.message || error.message || 'Login failed' 
@@ -76,16 +69,13 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     try {
       setLoading(true);
-      console.log('Registration attempt with data:', { ...userData, password: '[HIDDEN]' }); // Debug log
       
-      // Add mobile field as required by backend (you can make this configurable)
       const registrationData = {
         ...userData,
-        mobile: userData.mobile || '1234567890', // Default mobile for now
+        mobile: userData.mobile || '',
       };
       
       const response = await authAPI.registerRequest(registrationData);
-      console.log('Registration response:', response.data); // Debug log
       
       // Backend returns { message: 'OTP sent to email' } on success
       if (response.status === 200 && response.data.message) {
@@ -94,11 +84,6 @@ export const AuthProvider = ({ children }) => {
         return { success: false, message: response.data.message || response.data.error };
       }
     } catch (error) {
-      console.error('Register error:', error);
-      console.error('Register error response:', error.response?.data);
-      console.error('Register error status:', error.response?.status);
-      console.error('Register error message:', error.message);
-      
       let errorMessage = 'Registration failed';
       
       if (error.code === 'ECONNABORTED') {
@@ -130,7 +115,7 @@ export const AuthProvider = ({ children }) => {
       setToken(null);
       setUser(null);
     } catch (error) {
-      console.error('Logout error:', error);
+      // Silently fail
     }
   };
 
@@ -155,7 +140,7 @@ export const AuthProvider = ({ children }) => {
         await SecureStore.setItemAsync('user', JSON.stringify(mergedUser));
       }
     } catch (error) {
-      console.error('Failed to refresh user:', error);
+      // Silently fail
     } finally {
       setLoading(false);
     }

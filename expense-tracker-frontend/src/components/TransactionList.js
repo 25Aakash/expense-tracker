@@ -30,12 +30,12 @@ function TransactionList({ method }) {
   }, []);
 
   const unified = [
-    ...incomes.map(i => ({ ...i, type: t('income') })),
-    ...expenses.map(e => ({ ...e, type: t('expense') }))
+    ...incomes.map(i => ({ ...i, type: 'income', typeLabel: t('income') })),
+    ...expenses.map(e => ({ ...e, type: 'expense', typeLabel: t('expense') }))
   ].filter(r => r.method === method)
    .sort((a, b) => new Date(b.date) - new Date(a.date));
 
-  const apiPath = item => (item.type === t('income') ? `/incomes/${item._id}` : `/expenses/${item._id}`);
+  const apiPath = item => (item.type === 'income' ? `/incomes/${item._id}` : `/expenses/${item._id}`);
   const apiDelete = item => API.delete(apiPath(item));
   const apiUpdate = (item, body) => API.put(apiPath(item), body);
 
@@ -44,7 +44,7 @@ function TransactionList({ method }) {
     try {
       await apiDelete(item);
       toast.success(t('deleted'));
-      if (item.type === t('income')) setIncomes(p => p.filter(i => i._id !== item._id));
+      if (item.type === 'income') setIncomes(p => p.filter(i => i._id !== item._id));
       else setExpenses(p => p.filter(e => e._id !== item._id));
     } catch {
       toast.error(t('deleteFailed'));
@@ -67,7 +67,7 @@ function TransactionList({ method }) {
       await apiUpdate(editing, { ...form, amount: parseFloat(form.amount) });
       toast.success(t('updated'));
       const updater = arr => arr.map(r => (r._id === editing._id ? { ...r, ...form, amount: parseFloat(form.amount) } : r));
-      if (editing.type === t('income')) setIncomes(updater);
+      if (editing.type === 'income') setIncomes(updater);
       else setExpenses(updater);
     } catch {
       toast.error(t('updateFailed'));
@@ -93,10 +93,10 @@ function TransactionList({ method }) {
               <tr><td colSpan="5" className="text-center text-muted">{t("noTransactionsFound", { method })}</td></tr>
             ) : (
               unified.map((it, idx) => (
-                <tr key={idx} className={it.type === t('income') ? 'table-success' : 'table-danger'}>
+                <tr key={idx} className={it.type === 'income' ? 'table-success' : 'table-danger'}>
                   <td>{format(parseISO(it.date), 'yyyy-MM-dd')}</td>
                   <td>{it.category}</td>
-                  <td>{it.type}</td>
+                  <td>{it.typeLabel}</td>
                   <td className="text-end fw-bold">₹{it.amount}</td>
                   {(perms.canEdit || perms.canDelete) && (
                     <td className="text-end">

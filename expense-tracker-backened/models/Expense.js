@@ -6,11 +6,11 @@ const expenseSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
-  amount: Number,
-  category: String,
+  amount: { type: Number, required: true, min: 0 },
+  category: { type: String, required: true },
   note: String,
-  date: Date,
-  method: String
+  date: { type: Date, required: true },
+  method: { type: String, required: true }
 });
 
 module.exports = mongoose.model('Expense', expenseSchema);

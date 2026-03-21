@@ -67,7 +67,6 @@ const AddExpenseScreen = ({ navigation, route }) => {
       
       // Use the specific expense categories endpoint
       const response = await categoryAPI.getExpenseCategories();
-      console.log('Expense categories response:', response);
       
       // Backend returns { categories: [...] }
       const categoriesArray = response.data.categories || [];
@@ -78,7 +77,6 @@ const AddExpenseScreen = ({ navigation, route }) => {
         type: 'expense'
       }));
       
-      console.log('Processed expense categories:', expenseCategories);
       setCategories(expenseCategories);
       
       // Set first category as default if available
@@ -86,7 +84,6 @@ const AddExpenseScreen = ({ navigation, route }) => {
         setForm(prev => ({ ...prev, category: expenseCategories[0].name }));
       }
     } catch (error) {
-      console.error('Error loading categories:', error);
       Alert.alert('Error', 'Failed to load categories');
     } finally {
       setCategoriesLoading(false);
@@ -107,7 +104,6 @@ const AddExpenseScreen = ({ navigation, route }) => {
       setForm(prev => ({ ...prev, category: newCategoryName.trim() }));
       Alert.alert('Success', 'Category added successfully!');
     } catch (error) {
-      console.error('Error adding category:', error);
       Alert.alert('Error', 'Failed to add category');
     }
   };
@@ -167,7 +163,6 @@ const AddExpenseScreen = ({ navigation, route }) => {
         ]
       );
     } catch (error) {
-      console.error('Error adding expense:', error);
       Alert.alert(
         'Error',
         error.response?.data?.error || 'Failed to add expense'
@@ -193,7 +188,7 @@ const AddExpenseScreen = ({ navigation, route }) => {
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}  
         style={styles.keyboardAvoid}
       >
         {/* Header */}

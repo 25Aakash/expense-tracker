@@ -2,7 +2,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 
 const API = axios.create({
-  baseURL: 'https://expense-tracker-hirq.onrender.com/api'
+  baseURL: process.env.REACT_APP_API_URL || 'https://expense-tracker-hirq.onrender.com/api'
 });
 
 API.interceptors.request.use(cfg => {
@@ -47,6 +47,7 @@ export const addIncomeCategory = d => API.put('/user/categories/income', d);
 
 export const getProfile = () => API.get('/profile');
 export const updateProfile = d => API.put('/profile', d);
+export const deleteAccount = d => API.delete('/profile', { data: d });
 
 export const getTeamUsers = () => API.get('/manager/team-users');
 export const addUserUnderManager = d => API.post('/manager/add-user', d);
@@ -57,6 +58,6 @@ export const getAllUsers      = () => API.get('/admin/users');
 export const deleteUser       = (id) => API.delete(`/admin/users/${id}`);
 export const getUserIncomes   = (id) => API.get(`/admin/users/${id}/incomes`);
 export const getUserExpenses  = (id) => API.get(`/admin/users/${id}/expenses`);
-export const updateUserRole = (id, body) =>API.put(`/admin/users/${id}`, body);
+export const updateUserRole = (id, body) =>API.put(`/admin/users/${id}/role`, body);
 
 export default API;

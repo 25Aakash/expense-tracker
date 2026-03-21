@@ -1,3 +1,1 @@
-// src/utils/getPerms.js
-export const getPerms = () =>
-  JSON.parse(localStorage.getItem('permissions') || sessionStorage.getItem('permissions') || '{}');
+// src/utils/getPerms.js\nexport const getPerms = () => {\n  try { return JSON.parse(localStorage.getItem('permissions') || sessionStorage.getItem('permissions') || '{}'); }\n  catch { return {}; }\n};

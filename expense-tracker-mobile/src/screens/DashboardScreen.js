@@ -28,8 +28,6 @@ import { expenseAPI, incomeAPI } from '../services/api';
 import { format } from 'date-fns';
 
 const DashboardScreen = ({ navigation, route }) => {
-  console.log('DashboardScreen rendered');
-  
   const [stats, setStats] = useState({
     totalExpenses: 0,
     totalIncome: 0,
@@ -50,18 +48,13 @@ const DashboardScreen = ({ navigation, route }) => {
   const slideAnim = useRef(new Animated.Value(50)).current;
   const scaleAnim = useRef(new Animated.Value(0.9)).current;
 
-  console.log('User in dashboard:', user);
-
   useEffect(() => {
-    loadDashboardData();
     startAnimations();
   }, []);
 
-  // Add focus effect to refresh data when screen comes into focus
+  // Refresh data when screen comes into focus
   useFocusEffect(
     React.useCallback(() => {
-      console.log('Dashboard focused, refreshing data...');
-      // Add a small delay to ensure the screen is fully focused
       const timer = setTimeout(() => {
         loadDashboardData();
       }, 100);
@@ -70,34 +63,9 @@ const DashboardScreen = ({ navigation, route }) => {
     }, [])
   );
 
-  // Also add navigation listener for additional safety
-  useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => {
-      console.log('Dashboard navigation focus event triggered');
-      loadDashboardData();
-    });
-
-    return unsubscribe;
-  }, [navigation]);
-
-  // Add tab focus listener for when switching between tabs
-  useEffect(() => {
-    const unsubscribe = navigation.getParent()?.addListener('tabPress', (e) => {
-      if (e.target?.includes('Dashboard')) {
-        console.log('Dashboard tab pressed, refreshing data...');
-        setTimeout(() => {
-          loadDashboardData();
-        }, 100);
-      }
-    });
-
-    return unsubscribe || (() => {});
-  }, [navigation]);
-
   // Listen for route params to trigger refresh
   useEffect(() => {
     if (route.params?.refresh) {
-      console.log('Dashboard refresh requested via params');
       loadDashboardData();
       // Clear the refresh param to avoid repeated refreshes
       navigation.setParams({ refresh: false });
@@ -129,7 +97,6 @@ const DashboardScreen = ({ navigation, route }) => {
 
   const loadDashboardData = async () => {
     try {
-      console.log('Loading dashboard data...');
       setLoading(true);
       
       let expenses = [];
@@ -141,16 +108,12 @@ const DashboardScreen = ({ navigation, route }) => {
           incomeAPI.getAll(),
         ]);
 
-        console.log('Dashboard API responses:', { expenseResponse, incomeResponse });
         expenses = expenseResponse.data || [];
         incomes = incomeResponse.data || [];
       } catch (apiError) {
-        console.log('API Error:', apiError.message);
         expenses = [];
         incomes = [];
       }
-
-      console.log('Processing dashboard data...', { expenseCount: expenses.length, incomeCount: incomes.length });
 
       // Calculate totals
       const totalExpenses = expenses.reduce((sum, expense) => sum + (expense.amount || 0), 0);
@@ -204,10 +167,8 @@ const DashboardScreen = ({ navigation, route }) => {
         recentTransactions: allTransactions,
       };
 
-      console.log('Setting dashboard stats:', finalStats);
       setStats(finalStats);
     } catch (error) {
-      console.error('Error loading dashboard data:', error);
       const fallbackStats = {
         totalExpenses: 0,
         totalIncome: 0,
@@ -218,10 +179,8 @@ const DashboardScreen = ({ navigation, route }) => {
         bankBalance: 0,
         recentTransactions: [],
       };
-      console.log('Using fallback stats:', fallbackStats);
       setStats(fallbackStats);
     } finally {
-      console.log('Dashboard loading complete');
       setLoading(false);
     }
   };
@@ -259,7 +218,6 @@ const DashboardScreen = ({ navigation, route }) => {
 
   // Check if user is available
   if (!user) {
-    console.log('No user found, showing login prompt');
     return (
       <View style={[styles.errorContainer, { backgroundColor: theme.background }]}>
         <Text style={[styles.errorText, { color: theme.text }]}>Please log in to view dashboard</Text>
@@ -271,7 +229,6 @@ const DashboardScreen = ({ navigation, route }) => {
   }
 
   if (loading) {
-    console.log('Dashboard is loading...');
     return (
       <LinearGradient
         colors={isDarkMode ? [theme.background, theme.surface] : ['#ffffff', '#f8fafc']}
@@ -283,8 +240,6 @@ const DashboardScreen = ({ navigation, route }) => {
     );
   }
 
-  console.log('Rendering dashboard with stats:', stats);
-  
   return (
     <LinearGradient
       colors={isDarkMode ? [theme.background, theme.surface] : ['#f8fafc', '#e2e8f0']}

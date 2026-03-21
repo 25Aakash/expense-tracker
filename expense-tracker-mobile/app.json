@@ -4,7 +4,7 @@
     "slug": "dailycashbook",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/icon.jpeg",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "description": "A comprehensive expense tracking app for personal and team financial management with multi-role support.",
@@ -23,7 +23,7 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.expensetracker.pro",
+      "bundleIdentifier": "com.dailycashbook",
       "buildNumber": "1",
       "config": {
         "usesNonExemptEncryption": false
@@ -34,8 +34,8 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#6366f1"
       },
-      "package": "com.expensetracker.pro",
-      "versionCode": 9,
+      "package": "com.dailycashbook",
+      "versionCode": 2,
       "permissions": [],
       "edgeToEdgeEnabled": true
     },
@@ -48,14 +48,15 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "a878dfa8-9c1b-4119-8893-6b8c216ddfa2"
+        "projectId": "e1ac7a97-e754-4568-ad2d-36bcad291adc"
       },
       "supportEmail": "dailycashbook3@gmail.com",
       "supportUrl": "https://github.com/25Aakash/dailycashbook",
       "privacyPolicyUrl": "https://github.com/25Aakash/dailycashbook/blob/main/PRIVACY_POLICY.md",
-      "termsOfServiceUrl": "https://github.com/25Aakash/dailycashbook/blob/main/TERMS_OF_SERVICE.md"
+      "termsOfServiceUrl": "https://github.com/25Aakash/dailycashbook/blob/main/TERMS_OF_SERVICE.md",
+      "EXPO_PUBLIC_API_URL": "https://expense-tracker-hirq.onrender.com/api"
     },
-    "owner": "kaakash",
+    "owner": "kaakash2025",
     "runtimeVersion": {
       "policy": "appVersion"
     },

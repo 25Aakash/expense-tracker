@@ -65,7 +65,6 @@ const AddIncomeScreen = ({ navigation, route }) => {
       
       // Use the specific income categories endpoint
       const response = await categoryAPI.getIncomeCategories();
-      console.log('Income categories response:', response);
       
       // Backend returns { categories: [...] }
       const categoriesArray = response.data.categories || [];
@@ -75,8 +74,7 @@ const AddIncomeScreen = ({ navigation, route }) => {
         name,
         type: 'income'
       }));
-      
-      console.log('Processed income categories:', incomeCategories);
+
       setCategories(incomeCategories);
       
       // Set first category as default if available

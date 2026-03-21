@@ -13,7 +13,6 @@ class AnalyticsService {
     // - Amplitude
     // - Custom analytics solution
     
-    console.log('Analytics service initialized');
     this.isInitialized = true;
   }
 
@@ -30,7 +29,6 @@ class AnalyticsService {
     };
 
     // In production, send to your analytics service
-    console.log('Analytics Event:', eventData);
   }
 
   static trackScreen(screenName, properties = {}) {
@@ -50,7 +48,6 @@ class AnalyticsService {
     };
 
     // In production, send to crash reporting service
-    console.error('Error tracked:', errorData);
   }
 
   static trackUserAction(action, details = {}) {
@@ -64,7 +61,6 @@ class AnalyticsService {
     if (!this.isInitialized) return;
     
     // Set user properties in analytics service
-    console.log('User properties set:', properties);
   }
 
   static trackAppLaunch() {

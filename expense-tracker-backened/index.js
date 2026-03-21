@@ -59,22 +59,27 @@ app.use(helmet());
 app.use(cors({
   origin: (origin, cb) => {
     const allowed = (process.env.CLIENT_ORIGIN || '').split(',').filter(Boolean);
-    if (!origin || allowed.length === 0 || allowed.includes('*') || allowed.includes(origin)) return cb(null, true);
+    // Allow requests with no origin (mobile apps, curl, server-to-server)
+    if (!origin) return cb(null, true);
+    if (allowed.length === 0) return cb(new Error('CORS: No allowed origins configured'), false);
+    if (allowed.includes('*') || allowed.includes(origin)) return cb(null, true);
     return cb(new Error('CORS not allowed'), false);
   },
   credentials: true,
 }));
 app.use(express.json());
 
-// --- Swagger docs ---
-const swaggerSpec = swaggerJsdoc({
-  definition: {
-    openapi: '3.0.0',
-    info: { title: 'Expense Tracker API', version: '1.0.0' },
-  },
-  apis: ['./routes/*.js'],
-});
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+// --- Swagger docs (dev only) ---
+if (process.env.NODE_ENV !== 'production') {
+  const swaggerSpec = swaggerJsdoc({
+    definition: {
+      openapi: '3.0.0',
+      info: { title: 'Expense Tracker API', version: '1.0.0' },
+    },
+    apis: ['./routes/*.js'],
+  });
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+}
 
 // --- Liveness probe ---
 app.get('/health', (_req, res) => res.status(200).send('Server is healthy!'));

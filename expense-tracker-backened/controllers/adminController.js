@@ -7,21 +7,30 @@ const Expense  = require('../models/Expense');
    GET /api/admin/users – list every user (+manager name)
 ────────────────────────────────────────────────────────────── */
 exports.getAllUsers = async (_req, res) => {
-  const users = await User.find()
-    .populate('managerId', 'name')
-    .select('_id name email role managerId permissions');
-
-  res.json(users);
+  try {
+    const users = await User.find()
+      .populate('managerId', 'name')
+      .select('_id name email role managerId permissions');
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ error: 'Server error fetching users' });
+  }
 };
 
 /* ─────────────────────────────────────────────────────────────
    DELETE /api/admin/users/:id – remove user + their data
 ────────────────────────────────────────────────────────────── */
 exports.deleteUser = async (req, res) => {
-  await User.findByIdAndDelete(req.params.id);
-  await Income.deleteMany({ userId: req.params.id });
-  await Expense.deleteMany({ userId: req.params.id });
-  res.json({ message: 'User and their data deleted' });
+  try {
+    if (req.params.id === req.user.id)
+      return res.status(400).json({ error: 'Cannot delete yourself' });
+    await User.findByIdAndDelete(req.params.id);
+    await Income.deleteMany({ userId: req.params.id });
+    await Expense.deleteMany({ userId: req.params.id });
+    res.json({ message: 'User and their data deleted' });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error deleting user' });
+  }
 };
 
 /* helper: validate ObjectId */
@@ -39,7 +48,6 @@ exports.getUserIncomes = async (req, res) => {
     const incomes = await Income.find({ userId: id });
     res.json(incomes);
   } catch (err) {
-    console.error(err);
     res.status(500).json({ error: 'Server error while fetching incomes' });
   }
 };
@@ -56,7 +64,6 @@ exports.getUserExpenses = async (req, res) => {
     const expenses = await Expense.find({ userId: id });
     res.json(expenses);
   } catch (err) {
-    console.error(err);
     res.status(500).json({ error: 'Server error while fetching expenses' });
   }
 };
@@ -65,17 +72,29 @@ exports.getUserExpenses = async (req, res) => {
    PUT /api/admin/users/:id – update role / manager / permissions
 ────────────────────────────────────────────────────────────── */
 exports.updateUserRole = async (req, res) => {
-  const { id } = req.params;
-  if (!isValidId(id))
-    return res.status(400).json({ error: 'Invalid userId' });
+  try {
+    const { id } = req.params;
+    if (!isValidId(id))
+      return res.status(400).json({ error: 'Invalid userId' });
 
-  const { role, managerId, permissions } = req.body;
-  const update = {
-    ...(role       !== undefined && { role }),
-    ...(permissions !== undefined && { permissions }),
-    managerId: managerId || null
-  };
+    const allowedRoles = ['user', 'manager'];
+    const { role, managerId, permissions } = req.body;
 
-  await User.findByIdAndUpdate(id, update);
-  res.json({ message: 'User role / manager / permissions updated' });
+    if (role && !allowedRoles.includes(role))
+      return res.status(400).json({ error: 'Invalid role' });
+
+    if (id === req.user.id)
+      return res.status(400).json({ error: 'Cannot change your own role' });
+
+    const update = {
+      ...(role       !== undefined && { role }),
+      ...(permissions !== undefined && { permissions }),
+      managerId: managerId || null
+    };
+
+    await User.findByIdAndUpdate(id, update);
+    res.json({ message: 'User role / manager / permissions updated' });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error updating user' });
+  }
 };

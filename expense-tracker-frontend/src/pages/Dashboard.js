@@ -21,7 +21,7 @@ export default function Dashboard() {
   const [filters] = useState({ category:'', startDate:'', endDate:'' });
   const [showForm, setShowForm] = useState('income');
 
-  const permissions = JSON.parse(localStorage.getItem('permissions') || sessionStorage.getItem('permissions') || '{}');
+  const permissions = (() => { try { return JSON.parse(localStorage.getItem('permissions') || sessionStorage.getItem('permissions') || '{}'); } catch { return {}; } })();
 
   /* ---------------- fetch helpers ---------------- */
   const handleUnauthorized = () => {

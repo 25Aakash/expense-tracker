@@ -2,8 +2,6 @@ import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 import { API_BASE_URL } from '../config';
 
-console.log('API Base URL:', API_BASE_URL); // Debug log
-
 // Create axios instance
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -50,8 +48,8 @@ export const authAPI = {
   logout: () => api.post('/auth/logout'), // stateless
   verifyToken: () => api.get('/auth/verify'),
   getCurrentUser: () => api.get('/profile'),
-  requestReset: (email) => api.post('/auth/request-reset', { email }),
-  confirmReset: (email, otp, newPassword) => api.post('/auth/confirm-reset', { email, otp, newPassword }),
+  requestReset: (identifier) => api.post('/auth/request-reset', { identifier }),
+  confirmReset: (identifier, otp, newPassword) => api.post('/auth/confirm-reset', { identifier, otp, newPassword }),
   changePassword: (currentPassword, newPassword) => api.post('/auth/change-password', { currentPassword, newPassword }),
 };
 
@@ -77,6 +75,7 @@ export const incomeAPI = {
 export const profileAPI = {
   get: () => api.get('/profile'),
   update: (data) => api.put('/profile', data),
+  deleteAccount: (password) => api.delete('/profile', { data: { password } }),
 };
 
 // Categories API calls

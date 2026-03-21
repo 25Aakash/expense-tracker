@@ -76,8 +76,6 @@ exports.addIncomeCategory = async (req, res, next) => {
 };
 
 exports.deleteExpenseCategory = async (req, res, next) => {
-  console.log('DELETE req.body:', req.body);
-  // ...existing code...
   try {
     const { category } = req.body;
     if (!category) {

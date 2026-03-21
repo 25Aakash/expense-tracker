@@ -23,7 +23,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 import * as Updates from 'expo-updates';
 import { useAuth } from '../context/AuthContext';
 import { theme, isDarkMode } from '../utils/theme';
@@ -70,15 +70,15 @@ const LoginScreen = ({ navigation }) => {
 
   const loadSavedCredentials = async () => {
     try {
-      const savedRemember = await AsyncStorage.getItem('rememberMe');
-      const savedEmail = await AsyncStorage.getItem('savedEmail');
+      const savedRemember = await SecureStore.getItemAsync('rememberMe');
+      const savedEmail = await SecureStore.getItemAsync('savedEmail');
       
       if (savedRemember === 'true' && savedEmail) {
         setEmail(savedEmail);
         setRememberMe(true);
       }
     } catch (error) {
-      console.log('Error loading saved credentials:', error);
+      // Silently fail
     }
   };
 
@@ -91,14 +91,14 @@ const LoginScreen = ({ navigation }) => {
     // Save or remove credentials based on remember me
     try {
       if (rememberMe) {
-        await AsyncStorage.setItem('rememberMe', 'true');
-        await AsyncStorage.setItem('savedEmail', email.trim());
+        await SecureStore.setItemAsync('rememberMe', 'true');
+        await SecureStore.setItemAsync('savedEmail', email.trim());
       } else {
-        await AsyncStorage.removeItem('rememberMe');
-        await AsyncStorage.removeItem('savedEmail');
+        await SecureStore.deleteItemAsync('rememberMe');
+        await SecureStore.deleteItemAsync('savedEmail');
       }
     } catch (error) {
-      console.log('Error saving credentials:', error);
+      // Silently fail
     }
 
     const result = await login(email.trim(), password);

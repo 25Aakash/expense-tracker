@@ -8,22 +8,30 @@ const isManaged = (mgrId, user) => user && String(user.managerId) === String(mgr
 
 /* ───────── GET all team txns ───────── */
 exports.getTeamTransactions = async (req, res) => {
-  const users   = await User.find({ managerId: req.user.id }).select('_id');
-  const userIds = users.map(u => u._id);
+  try {
+    const users   = await User.find({ managerId: req.user.id }).select('_id');
+    const userIds = users.map(u => u._id);
 
-  const [incomes, expenses] = await Promise.all([
-    Income.find({ userId: { $in: userIds } }),
-    Expense.find({ userId: { $in: userIds } }),
-  ]);
+    const [incomes, expenses] = await Promise.all([
+      Income.find({ userId: { $in: userIds } }),
+      Expense.find({ userId: { $in: userIds } }),
+    ]);
 
-  res.json({ incomes, expenses });
+    res.json({ incomes, expenses });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error fetching team transactions' });
+  }
 };
 
 /* ───────── GET team users ───────── */
 exports.getTeamUsers = async (req, res) => {
-  const users = await User.find({ managerId: req.user.id })
-    .select('_id name email permissions');
-  res.json(users);
+  try {
+    const users = await User.find({ managerId: req.user.id })
+      .select('_id name email permissions');
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ error: 'Server error fetching team users' });
+  }
 };
 
 /* ───────── GET single managed user ───────── */
@@ -47,42 +55,53 @@ exports.getManagedUserExpenses = async (req, res) => {
 
 /* ───────── ADD user under manager ───────── */
 exports.addUserUnderManager = async (req, res) => {
-  const { name, email, mobile, password, permissions } = req.body;
-  if (await User.exists({ email })) {
-    return res.status(400).json({ error: 'Email already exists' });
+  try {
+    const { name, email, mobile, password, permissions } = req.body;
+    if (await User.exists({ email })) {
+      return res.status(400).json({ error: 'Email already exists' });
+    }
+    await User.create({
+      name, email, mobile,
+      password,
+      role     : 'user',
+      managerId: req.user.id,
+      isVerified: true,
+      permissions: permissions || {},
+    });
+    res.status(201).json({ message: 'User added' });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error adding user' });
   }
-  // Don't manually hash - the User model's pre-save hook will handle it
-  await User.create({
-    name, email, mobile,
-    password,  // Pass plain password - will be hashed by pre-save hook
-    role     : 'user',
-    managerId: req.user.id,
-    isVerified: true,
-    permissions: permissions || {},
-  });
-  res.status(201).json({ message: 'User added' });
 };
 
 /* ───────── UPDATE perms ───────── */
 exports.updateUserPermissions = async (req, res) => {
-  const user = await User.findOneAndUpdate(
-    { _id: req.params.id, managerId: req.user.id },
-    { permissions: req.body.permissions },
-    { new: true }
-  );
-  if (!user) return res.status(404).json({ error: 'User not found' });
-  res.json({ message: 'Permissions updated' });
+  try {
+    const user = await User.findOneAndUpdate(
+      { _id: req.params.id, managerId: req.user.id },
+      { permissions: req.body.permissions },
+      { new: true }
+    );
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    res.json({ message: 'Permissions updated' });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error updating permissions' });
+  }
 };
 
 /* ───────── DELETE user under manager ───────── */
 exports.deleteManagedUser = async (req, res) => {
-  const user = await User.findOne({ _id: req.params.id, managerId: req.user.id });
-  if (!user) return res.status(404).json({ error: 'User not found' });
+  try {
+    const user = await User.findOne({ _id: req.params.id, managerId: req.user.id });
+    if (!user) return res.status(404).json({ error: 'User not found' });
 
-  await Promise.all([
-    Income.deleteMany({ userId: user._id }),
-    Expense.deleteMany({ userId: user._id }),
-    user.deleteOne(),
-  ]);
-  res.json({ message: 'User & data deleted' });
+    await Promise.all([
+      Income.deleteMany({ userId: user._id }),
+      Expense.deleteMany({ userId: user._id }),
+      user.deleteOne(),
+    ]);
+    res.json({ message: 'User & data deleted' });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error deleting user' });
+  }
 };

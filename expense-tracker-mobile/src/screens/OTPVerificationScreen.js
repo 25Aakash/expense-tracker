@@ -100,8 +100,6 @@ const OTPVerificationScreen = ({ navigation, route }) => {
       setLoading(true);
       const response = await authAPI.verifyOtp(email, otp);
       
-      console.log('OTP verification response:', response.data);
-      
       // Backend returns { message: 'Registration complete' } on success
       if (response.status === 200 && response.data.message) {
         Alert.alert(
@@ -118,10 +116,6 @@ const OTPVerificationScreen = ({ navigation, route }) => {
         Alert.alert('Error', response.data.message || 'Invalid OTP');
       }
     } catch (error) {
-      console.error('OTP verification error:', error);
-      console.error('Error response:', error.response?.data);
-      console.error('Error status:', error.response?.status);
-      
       // Handle different error cases
       if (error.response?.status === 400) {
         Alert.alert('Error', error.response.data.error || 'Invalid OTP');
@@ -143,8 +137,6 @@ const OTPVerificationScreen = ({ navigation, route }) => {
       setResendLoading(true);
       const response = await authAPI.resendOtp(email);
       
-      console.log('Resend OTP response:', response.data);
-      
       // Backend returns { message: 'New OTP sent' } on success
       if (response.status === 200 && response.data.message) {
         Alert.alert('Success', response.data.message || 'OTP has been resent to your email');
@@ -153,8 +145,6 @@ const OTPVerificationScreen = ({ navigation, route }) => {
         Alert.alert('Error', response.data.message || 'Failed to resend OTP');
       }
     } catch (error) {
-      console.error('Resend OTP error:', error);
-      console.error('Error response:', error.response?.data);
       Alert.alert(
         'Error',
         error.response?.data?.error || error.response?.data?.message || 'Failed to resend OTP'

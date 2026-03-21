@@ -17,12 +17,14 @@ import {
   Portal,
   Button,
   RadioButton,
+  TextInput,
 } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../context/AuthContext';
+import { profileAPI } from '../services/api';
 import { theme } from '../utils/theme';
 
 const SettingsScreen = ({ navigation }) => {
@@ -38,6 +40,9 @@ const SettingsScreen = ({ navigation }) => {
   const [showCurrencyDialog, setShowCurrencyDialog] = useState(false);
   const [showLanguageDialog, setShowLanguageDialog] = useState(false);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deletePassword, setDeletePassword] = useState('');
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
     loadSettings();
@@ -103,41 +108,39 @@ const SettingsScreen = ({ navigation }) => {
     }
   };
 
-  const handleExportData = () => {
-    Alert.alert(
-      'Export Data',
-      'Data export functionality will be available in the next update.',
-      [{ text: 'OK' }]
-    );
-  };
-
-  const handleBackupRestore = () => {
-    Alert.alert(
-      'Backup & Restore',
-      'Cloud backup functionality will be available in the next update.',
-      [{ text: 'OK' }]
-    );
-  };
-
   const handleDeleteAccount = () => {
-    Alert.alert(
-      'Delete Account',
-      'Are you sure you want to permanently delete your account? This action cannot be undone.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: () => {
-            Alert.alert(
-              'Feature Coming Soon',
-              'Account deletion will be available in the next update. Please contact support for assistance.',
-              [{ text: 'OK' }]
-            );
+    setDeletePassword('');
+    setShowDeleteDialog(true);
+  };
+
+  const confirmDeleteAccount = async () => {
+    if (!deletePassword.trim()) {
+      Alert.alert('Error', 'Please enter your password');
+      return;
+    }
+    try {
+      setDeleteLoading(true);
+      await profileAPI.deleteAccount(deletePassword);
+      setShowDeleteDialog(false);
+      Alert.alert(
+        'Account Deleted',
+        'Your account and all associated data have been permanently deleted.',
+        [
+          {
+            text: 'OK',
+            onPress: () => {
+              logout();
+              navigation.getParent()?.replace('Login');
+            },
           },
-        },
-      ]
-    );
+        ]
+      );
+    } catch (error) {
+      const msg = error.response?.data?.error || 'Failed to delete account';
+      Alert.alert('Error', msg);
+    } finally {
+      setDeleteLoading(false);
+    }
   };
 
   const handleContactSupport = () => {
@@ -233,26 +236,6 @@ const SettingsScreen = ({ navigation }) => {
           {/* Data & Privacy */}
           <Surface style={styles.section} elevation={1}>
             <Text style={styles.sectionTitle}>Data & Privacy</Text>
-            
-            <TouchableOpacity onPress={handleExportData}>
-              <List.Item
-                title="Export Data"
-                description="Download your financial data"
-                left={(props) => <List.Icon {...props} icon="download" />}
-                right={(props) => <List.Icon {...props} icon="chevron-right" />}
-              />
-            </TouchableOpacity>
-            <Divider />
-            
-            <TouchableOpacity onPress={handleBackupRestore}>
-              <List.Item
-                title="Backup & Restore"
-                description="Sync your data to cloud"
-                left={(props) => <List.Icon {...props} icon="cloud-upload-outline" />}
-                right={(props) => <List.Icon {...props} icon="chevron-right" />}
-              />
-            </TouchableOpacity>
-            <Divider />
             
             <TouchableOpacity onPress={handlePrivacyPolicy}>
               <List.Item
@@ -394,6 +377,32 @@ const SettingsScreen = ({ navigation }) => {
           <Dialog.Actions>
             <Button onPress={() => setShowLogoutDialog(false)}>Cancel</Button>
             <Button onPress={handleLogout} textColor="#ef4444">Logout</Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
+
+      {/* Delete Account Dialog */}
+      <Portal>
+        <Dialog visible={showDeleteDialog} onDismiss={() => !deleteLoading && setShowDeleteDialog(false)}>
+          <Dialog.Title>Delete Account</Dialog.Title>
+          <Dialog.Content>
+            <Text style={{ marginBottom: 12 }}>
+              This will permanently delete your account and all your data (expenses, incomes, categories). This action cannot be undone.
+            </Text>
+            <TextInput
+              label="Enter your password to confirm"
+              value={deletePassword}
+              onChangeText={setDeletePassword}
+              secureTextEntry
+              mode="outlined"
+              disabled={deleteLoading}
+            />
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={() => setShowDeleteDialog(false)} disabled={deleteLoading}>Cancel</Button>
+            <Button onPress={confirmDeleteAccount} textColor="#ef4444" loading={deleteLoading} disabled={deleteLoading}>
+              Delete
+            </Button>
           </Dialog.Actions>
         </Dialog>
       </Portal>

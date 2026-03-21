@@ -4,21 +4,22 @@ const axios = require('axios');
 
 // Send OTP via SMS using STPL API
 async function sendOtpSms(mobile, otp) {
-  // Use environment variables for SMS API credentials (fallback to hardcoded for backward compatibility)
-  const smsUserId = process.env.SMS_API_USERID || 'riddhisiddhi';
-  const smsPassword = process.env.SMS_API_PASSWORD || 'eNyv6gCE';
-  const smsSenderId = process.env.SMS_API_SENDERID || 'RIDSID';
+  const smsUserId = process.env.SMS_API_USERID;
+  const smsPassword = process.env.SMS_API_PASSWORD;
+  const smsSenderId = process.env.SMS_API_SENDERID;
+
+  if (!smsUserId || !smsPassword || !smsSenderId) {
+    throw new Error('SMS API credentials not configured');
+  }
   
   // Ensure mobile number is properly formatted (10 digits for India)
   const formattedMobile = mobile.replace(/\D/g, '').slice(-10);
   
   if (formattedMobile.length !== 10) {
-    console.error('Invalid mobile number format:', mobile);
     throw new Error('Invalid mobile number format');
   }
   
-  // Use approved template format (match the working Riddhi Siddhi template structure)
-  const msg = `Dear user, ${otp} is your OTP to login to Riddhi Siddhi Trading Co. mobile app. This OTP is valid for 15 minutes. Do not share it with anyone. Login at http://riddhisiddhitrading.co.in/index.html`;
+  // NOTE: This message uses the DLT-approved template registered with STPL.\n  // Changing the text will cause SMS delivery to fail. To update branding,\n  // register a new template with the STPL portal first.\n  const msg = `Dear user, ${otp} is your OTP to login to Riddhi Siddhi Trading Co. mobile app. This OTP is valid for 15 minutes. Do not share it with anyone. Login at http://riddhisiddhitrading.co.in/index.html`;
   
   // Build URL manually - Don't encode the entire message, just spaces and special chars
   const baseUrl = 'https://smsnotify.one/SMSApi/send';
@@ -27,11 +28,7 @@ async function sendOtpSms(mobile, otp) {
   const fullUrl = `${baseUrl}?userid=${smsUserId}&password=${smsPassword}&sendMethod=quick&mobile=${formattedMobile}&msg=${encodedMsg}&senderid=${smsSenderId}&msgType=text&format=text`;
   
   try {
-    console.log(`Attempting to send OTP SMS to ${formattedMobile.slice(0, 3)}****${formattedMobile.slice(-3)}`);
-    console.log('SMS API URL (masked):', fullUrl.replace(smsPassword, '***'));
-    
     const response = await axios.get(fullUrl, { timeout: 30000 });
-    console.log('SMS API Response:', response.data);
     
     // Parse the SMS API response - format=text returns string like:
     // "SimpleMessageSuccessResponse [status=success, statusCode=200, reason=success, ...]"
@@ -49,19 +46,11 @@ async function sendOtpSms(mobile, otp) {
                     responseData.includes('statusCode=5');    // 5xx errors
     
     if (isError && !isSuccess) {
-      console.error('SMS API returned error:', responseData);
       throw new Error(`SMS API Error: ${responseData}`);
     }
     
-    console.log('SMS sent successfully!');
     return { success: true, data: response.data };
   } catch (error) {
-    console.error('Error sending OTP SMS:', error.response?.data || error.message);
-    console.error('SMS API Error Details:', {
-      status: error.response?.status,
-      statusText: error.response?.statusText,
-      data: error.response?.data
-    });
     throw error;
   }
 }

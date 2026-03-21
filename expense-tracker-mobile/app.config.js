@@ -4,12 +4,11 @@
 export default ({ config }) => {
   return {
     ...config,
-    name: config.name || 'ExpenseTracker',
-    slug: config.slug || 'expense-tracker-mobile',
+    name: config.name || 'DailyCashBook',
+    slug: config.slug || 'dailycashbook',
     version: config.version || '1.0.0',
     android: {
       ...config.android,
-      versionCode: 9,  // Incremented to 9 since 7 and 8 failed
     },
     extra: {
       ...config.extra,

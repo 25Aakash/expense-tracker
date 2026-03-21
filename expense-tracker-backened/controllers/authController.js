@@ -33,13 +33,10 @@ exports.registerRequest = async (req, res) => {
     if (mobile) {
       await sendOtpSms(mobile, otp);
       smsSent = true;
-      console.log(`OTP SMS sent successfully to ${mobile.slice(0, 3)}****${mobile.slice(-3)}`);
     }
   } catch (smsErr) {
-    console.error('Failed to send OTP SMS:', smsErr.message);
+    // SMS sending failed
   }
-  
-  console.log(`OTP for ${email}: ${otp}`); // Debug log - remove in production
   
   // Provide feedback to the user
   if (smsSent) {
@@ -50,19 +47,15 @@ exports.registerRequest = async (req, res) => {
     });
   } else {
     // SMS failed - still return success but with warning
-    console.warn(`OTP delivery failed for ${email}, OTP: ${otp}`);
     res.json({ 
       message: 'Registration initiated. If you do not receive OTP, please contact support.',
       smsSent: false,
       emailSent: false,
-      warning: 'OTP delivery may be delayed. Please wait a few minutes.',
-      // In development, you might want to include the OTP for testing
-      ...(process.env.NODE_ENV === 'development' && { debugOtp: otp })
+      warning: 'OTP delivery may be delayed. Please wait a few minutes.'
     });
   }
   } catch (error) {
-    console.error('Registration error:', error);
-    res.status(500).json({ error: 'Error sending OTP', details: error.message });
+    res.status(500).json({ error: 'Error sending OTP' });
   }
 };
 
@@ -90,7 +83,7 @@ exports.resendOtp = async (req, res) => {
         smsSent = true;
       }
     } catch (smsErr) {
-      console.error('Failed to resend OTP SMS:', smsErr.message);
+      // SMS sending failed
     }
     
     // Try to send OTP via Email
@@ -100,10 +93,8 @@ exports.resendOtp = async (req, res) => {
         emailSent = true;
       }
     } catch (emailErr) {
-      console.error('Failed to resend OTP Email:', emailErr.message);
+      // Email sending failed
     }
-    
-    console.log(`Resent OTP for ${email}: ${record.code}`); // Debug log
     
     const channels = [];
     if (smsSent) channels.push('mobile');
@@ -114,11 +105,9 @@ exports.resendOtp = async (req, res) => {
         ? `New OTP sent to your ${channels.join(' and ')}` 
         : 'OTP resend attempted. Please wait a few minutes.',
       smsSent,
-      emailSent,
-      ...(process.env.NODE_ENV === 'development' && { debugOtp: record.code })
+      emailSent
     });
   } catch (error) {
-    console.error('Resend OTP error:', error);
     res.status(500).json({ error: 'Failed to resend OTP' });
   }
 };
@@ -206,7 +195,6 @@ exports.login = async (req, res) => {
       }
     });
   } catch (err) {
-    console.error('Login error:', err);
     res.status(500).json({ error: 'Server error' });
   }
 };
@@ -215,7 +203,6 @@ exports.login = async (req, res) => {
 //  Forgot-password – request OTP (supports email or mobile)
 //─────────────────────────────────────────────────────────────
 exports.requestReset = async (req, res) => {
-  console.log('requestReset called with body:', req.body);
   const { identifier } = req.body; // Can be email or mobile
   
   if (!identifier) {
@@ -283,7 +270,7 @@ exports.requestReset = async (req, res) => {
       await sendOtpEmail(identifier, otp);
       emailSent = true;
     } catch (err) {
-      console.error('Failed to send reset OTP email:', err.message);
+      // Email sending failed
     }
   } else {
     // Send via SMS
@@ -291,11 +278,9 @@ exports.requestReset = async (req, res) => {
       await sendOtpSms(user.mobile, otp);
       smsSent = true;
     } catch (err) {
-      console.error('Failed to send reset OTP SMS:', err.message);
+      // SMS sending failed
     }
   }
-
-  console.log(`Password reset OTP for ${isEmail ? 'email' : 'mobile'} ${identifier}: ${otp}`);
   
   res.json({ 
     message: 'OTP sent if account exists',
@@ -369,16 +354,21 @@ exports.confirmReset = async (req, res) => {
 //  Logged-in password change
 //─────────────────────────────────────────────────────────────
 exports.changePassword = async (req, res) => {
-  const { currentPassword, newPassword } = req.body;
-  const user = await User.findById(req.user.id);
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const user = await User.findById(req.user.id).select('+password');
+    if (!user) return res.status(404).json({ error: 'User not found' });
 
-  const isMatch = await bcrypt.compare(currentPassword, user.password);
-  if (!isMatch) return res.status(401).json({ error: 'Current password incorrect' });
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) return res.status(401).json({ error: 'Current password incorrect' });
 
-  user.password = newPassword; // hook will hash
-  await user.save();
+    user.password = newPassword; // hook will hash
+    await user.save();
 
-  res.json({ message: 'Password updated successfully' });
+    res.json({ message: 'Password updated successfully' });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error changing password' });
+  }
 };
 
 //─────────────────────────────────────────────────────────────

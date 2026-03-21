@@ -25,7 +25,7 @@ router.post('/resend-otp',       rateLimiter, resendOtp);
 router.post('/verify-otp', verifyOtp);
 
 // ── Login ────────────────────────────────────────────────────
-router.post('/login', validate(schemas.login), login);
+router.post('/login', rateLimiter, validate(schemas.login), login);
 router.get('/verify', auth, verifyToken);
 router.post('/logout', auth, logout);
 

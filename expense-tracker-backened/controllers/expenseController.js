@@ -2,7 +2,8 @@ const Expense = require('../models/Expense');
 
 exports.addExpense = async (req, res, next) => {
   try {
-    const expense = new Expense({ ...req.body, userId: req.user.id });
+    const { amount, category, note, date, method } = req.body;
+    const expense = new Expense({ amount, category, note, date, method, userId: req.user.id });
     await expense.save();
     res.status(201).json(expense);
   } catch (err) {
@@ -29,13 +30,17 @@ exports.getExpenses = async (req, res, next) => {
 exports.updateExpense = async (req, res, next) => {
   try {
     const { id } = req.params;
-
-    // Optionally normalise amount to Number
-    if (req.body.amount) req.body.amount = parseFloat(req.body.amount);
+    const { amount, category, note, date, method } = req.body;
+    const updates = {};
+    if (amount !== undefined) updates.amount = parseFloat(amount);
+    if (category !== undefined) updates.category = category;
+    if (note !== undefined) updates.note = note;
+    if (date !== undefined) updates.date = date;
+    if (method !== undefined) updates.method = method;
 
     const updated = await Expense.findOneAndUpdate(
       { _id: id, userId: req.user.id },
-      req.body,
+      updates,
       { new: true }
     );
 

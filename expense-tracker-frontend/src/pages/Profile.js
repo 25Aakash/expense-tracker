@@ -1,9 +1,10 @@
 // src/pages/Profile.js
 import React, { useEffect, useState } from 'react';
 import API from '../services/api';
+import { deleteAccount } from '../services/api';
 import { toast } from 'react-toastify';
 import { format } from 'date-fns';
-import { FaSignOutAlt, FaUserCircle } from 'react-icons/fa';
+import { FaSignOutAlt, FaUserCircle, FaTrashAlt } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 
@@ -12,6 +13,9 @@ export default function Profile() {
 
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletePassword, setDeletePassword] = useState('');
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -37,7 +41,28 @@ export default function Profile() {
 
   const handleLogout = () => {
     localStorage.clear();
+    sessionStorage.clear();
     window.location.replace('/login');
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!deletePassword.trim()) {
+      toast.error('Please enter your password');
+      return;
+    }
+    try {
+      setDeleteLoading(true);
+      await deleteAccount({ password: deletePassword });
+      toast.success('Account deleted successfully');
+      setShowDeleteModal(false);
+      localStorage.clear();
+      sessionStorage.clear();
+      window.location.replace('/login');
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Failed to delete account');
+    } finally {
+      setDeleteLoading(false);
+    }
   };
 
   return (
@@ -106,8 +131,51 @@ export default function Profile() {
             <FaSignOutAlt className="me-2" />
             {t('logout')}
           </button>
+
+          {/* delete account */}
+          <button
+            className="btn btn-outline-danger rounded-pill px-4 shadow-sm mt-2"
+            onClick={() => { setDeletePassword(''); setShowDeleteModal(true); }}
+            disabled={loading}
+          >
+            <FaTrashAlt className="me-2" />
+            Delete Account
+          </button>
         </div>
       </div>
+
+      {/* Delete Account Modal */}
+      {showDeleteModal && (
+        <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content" style={{ borderRadius: '16px' }}>
+              <div className="modal-header border-0">
+                <h5 className="modal-title text-danger fw-bold">Delete Account</h5>
+                <button type="button" className="btn-close" onClick={() => setShowDeleteModal(false)} disabled={deleteLoading}></button>
+              </div>
+              <div className="modal-body">
+                <p className="text-muted small">
+                  This will permanently delete your account and all your data (expenses, incomes, categories). This action cannot be undone.
+                </p>
+                <input
+                  type="password"
+                  className="form-control"
+                  placeholder="Enter your password to confirm"
+                  value={deletePassword}
+                  onChange={(e) => setDeletePassword(e.target.value)}
+                  disabled={deleteLoading}
+                />
+              </div>
+              <div className="modal-footer border-0">
+                <button className="btn btn-secondary" onClick={() => setShowDeleteModal(false)} disabled={deleteLoading}>Cancel</button>
+                <button className="btn btn-danger" onClick={handleDeleteAccount} disabled={deleteLoading}>
+                  {deleteLoading ? 'Deleting...' : 'Delete Account'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

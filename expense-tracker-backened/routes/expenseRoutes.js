@@ -19,7 +19,7 @@ const expenseSchema = Joi.object({
   date:     Joi.date().required(),
 });
 
-router.post('/add',          auth, validate(expenseSchema), addExpense);
+router.post('/add',          auth, can('canAdd'), validate(expenseSchema), addExpense);
 router.get('/',           auth,                  getExpenses);
 router.put('/:id',  auth, can('canEdit'), updateExpense);
 router.delete('/:id',     auth, can('canDelete'), deleteExpense);

@@ -19,7 +19,7 @@ const incomeSchema = Joi.object({
   date:     Joi.date().required(),
 });
 
-router.post('/add',          auth, validate(incomeSchema), addIncome);
+router.post('/add',          auth, can('canAdd'), validate(incomeSchema), addIncome);
 router.get('/',           auth,                  getIncomes);
 router.put('/:id',  auth, can('canEdit'), updateIncome);
 router.delete('/:id',     auth, can('canDelete'), deleteIncome);

@@ -2,7 +2,8 @@ const Income = require('../models/Income');
 
 exports.addIncome = async (req, res, next) => {
   try {
-    const income = new Income({ ...req.body, userId: req.user.id });
+    const { amount, category, note, date, method } = req.body;
+    const income = new Income({ amount, category, note, date, method, userId: req.user.id });
     await income.save();
     res.status(201).json(income);
   } catch (err) {
@@ -29,11 +30,17 @@ exports.getIncomes = async (req, res, next) => {
 exports.updateIncome = async (req, res, next) => {
   try {
     const { id } = req.params;
-    if (req.body.amount) req.body.amount = parseFloat(req.body.amount);
+    const { amount, category, note, date, method } = req.body;
+    const updates = {};
+    if (amount !== undefined) updates.amount = parseFloat(amount);
+    if (category !== undefined) updates.category = category;
+    if (note !== undefined) updates.note = note;
+    if (date !== undefined) updates.date = date;
+    if (method !== undefined) updates.method = method;
 
     const updated = await Income.findOneAndUpdate(
       { _id: id, userId: req.user.id },
-      req.body,
+      updates,
       { new: true }
     );
 

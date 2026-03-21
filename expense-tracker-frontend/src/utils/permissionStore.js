@@ -1,6 +1,6 @@
 // src/utils/permissionStore.js
 let listeners = [];
-let perms = JSON.parse(localStorage.getItem('permissions') || sessionStorage.getItem('permissions') || '{}');
+let perms = (() => { try { return JSON.parse(localStorage.getItem('permissions') || sessionStorage.getItem('permissions') || '{}'); } catch { return {}; } })();
 
 export function getPerms() {
   return perms;

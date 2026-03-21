@@ -32,10 +32,7 @@ const AboutScreen = ({ navigation }) => {
   };
 
   const handleRateApp = () => {
-    const storeUrl = Platform.select({
-      ios: 'https://apps.apple.com/app/your-app-id',
-      android: 'https://play.google.com/store/apps/details?id=com.expensetracker.pro'
-    });
+    const storeUrl = 'https://play.google.com/store/apps/details?id=com.dailycashbook';
     Linking.openURL(storeUrl);
   };
 

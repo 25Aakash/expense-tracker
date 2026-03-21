@@ -1,4 +1,4 @@
-import { Alert, Linking, Platform } from 'react-native';
+import { Alert, Linking } from 'react-native';
 import * as Application from 'expo-application';
 
 class AppUpdateService {
@@ -56,11 +56,7 @@ class AppUpdateService {
   }
 
   static openStore() {
-    const storeUrl = Platform.select({
-      ios: 'https://apps.apple.com/app/your-app-id',
-      android: 'https://play.google.com/store/apps/details?id=com.expensetracker.pro'
-    });
-    
+    const storeUrl = 'https://play.google.com/store/apps/details?id=com.dailycashbook';
     Linking.openURL(storeUrl);
   }
 

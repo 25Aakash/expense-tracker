@@ -22,6 +22,26 @@ import './styles.css';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+/* ---------- Error Boundary ---------- */
+class ErrorBoundary extends React.Component {
+  state = { hasError: false };
+  static getDerivedStateFromError() { return { hasError: true }; }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ textAlign: 'center', padding: '4rem' }}>
+          <h2>Something went wrong</h2>
+          <p>Please refresh the page or try again later.</p>
+          <button onClick={() => window.location.reload()} className="btn btn-primary mt-3">
+            Refresh Page
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 /* ---------- helper: never crash on bad JSON ---------- */
 const safeParse = (val, fb = {}) => {
   if (!val || val === 'undefined') return fb;
@@ -30,8 +50,10 @@ const safeParse = (val, fb = {}) => {
 
 function App() {
   const permissions = safeParse(localStorage.getItem('permissions') || sessionStorage.getItem('permissions'));
+  const user = safeParse(localStorage.getItem('user') || sessionStorage.getItem('user'));
 
   return (
+    <ErrorBoundary>
     <Router>
       <ToastContainer position="top-center" autoClose={3000} hideProgressBar newestOnTop theme="colored" />
       <Routes>
@@ -53,14 +75,23 @@ function App() {
           {permissions.canAccessReports && (
             <Route path="reports"         element={<Reports />} />
           )}
-          <Route path="admin"             element={<Admin />} />
-          <Route path="admin/users/:userId" element={<AdminUserDetails/>} />
-          <Route path="manager"           element={<ManagerDashboard />} />
-          <Route path="manager/user/:id" element={<ManagerUserDetail />} />
+          {user?.role === 'admin' && (
+            <>
+              <Route path="admin"             element={<Admin />} />
+              <Route path="admin/users/:userId" element={<AdminUserDetails/>} />
+            </>
+          )}
+          {(user?.role === 'manager' || user?.role === 'admin') && (
+            <>
+              <Route path="manager"           element={<ManagerDashboard />} />
+              <Route path="manager/user/:id" element={<ManagerUserDetail />} />
+            </>
+          )}
           <Route path="*"                 element={<NotFound />} />
         </Route>
       </Routes>
     </Router>
+    </ErrorBoundary>
   );
 }
 

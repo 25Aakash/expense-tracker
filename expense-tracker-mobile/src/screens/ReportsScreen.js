@@ -307,14 +307,6 @@ const ReportsScreen = ({ navigation }) => {
       ]
     };
 
-    // Add some debugging
-    console.log('Chart Data:', {
-      labels: trendData.labels,
-      expenseData: trendData.datasets[0].data,
-      incomeData: incomeData.datasets[0].data,
-      dailyDataCount: dailyData.length
-    });
-
     // Top categories
     const topCategories = categoryBreakdown.slice(0, 5);
 
