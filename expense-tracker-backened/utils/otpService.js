@@ -2,55 +2,60 @@
 const nodemailer = require('nodemailer');
 const axios = require('axios');
 
-// Send OTP via SMS using STPL API
-async function sendOtpSms(mobile, otp) {
+// Send OTP via SMS using STPL API (smsnotify.one)
+async function sendOtpSms(mobile, otp, purpose = 'register') {
   const smsUserId = process.env.SMS_API_USERID;
   const smsPassword = process.env.SMS_API_PASSWORD;
   const smsSenderId = process.env.SMS_API_SENDERID;
 
   if (!smsUserId || !smsPassword || !smsSenderId) {
-    throw new Error('SMS API credentials not configured');
+    throw new Error('SMS API credentials not configured. Set SMS_API_USERID, SMS_API_PASSWORD, SMS_API_SENDERID.');
   }
-  
-  // Ensure mobile number is properly formatted (10 digits for India)
-  const formattedMobile = mobile.replace(/\D/g, '').slice(-10);
-  
+
+  // Normalize mobile to 10 digits (strip +91, 91, or leading 0)
+  let formattedMobile = mobile.replace(/\D/g, '');
+  if (formattedMobile.length === 12 && formattedMobile.startsWith('91')) formattedMobile = formattedMobile.slice(2);
+  if (formattedMobile.length === 11 && formattedMobile.startsWith('0')) formattedMobile = formattedMobile.slice(1);
+
   if (formattedMobile.length !== 10) {
     throw new Error('Invalid mobile number format');
   }
-  
-  // NOTE: This message uses the DLT-approved template registered with STPL.\n  // Changing the text will cause SMS delivery to fail. To update branding,\n  // register a new template with the STPL portal first.\n  const msg = `Dear user, ${otp} is your OTP to login to Riddhi Siddhi Trading Co. mobile app. This OTP is valid for 15 minutes. Do not share it with anyone. Login at http://riddhisiddhitrading.co.in/index.html`;
-  
-  // Build URL manually - Don't encode the entire message, just spaces and special chars
-  const baseUrl = 'https://smsnotify.one/SMSApi/send';
-  // Encode only spaces to %20, keep commas and other chars as-is to match approved template
-  const encodedMsg = msg.replace(/ /g, '%20');
-  const fullUrl = `${baseUrl}?userid=${smsUserId}&password=${smsPassword}&sendMethod=quick&mobile=${formattedMobile}&msg=${encodedMsg}&senderid=${smsSenderId}&msgType=text&format=text`;
-  
+
+  // DLT-approved templates – must match exactly what is registered on smsnotify.one
+  const message = purpose === 'reset'
+    ? `Dear User, ${otp} is your OTP to reset password of your Riddhi Siddhi Trading Co account. Valid for 10 minutes. Do not share it with anyone.`
+    : `Dear User, ${otp} is your OTP to register your Riddhi Siddhi Trading Co account. Valid for 10 minutes. Do not share it with anyone.`;
+
+  const params = {
+    userid: smsUserId,
+    password: smsPassword,
+    sendMethod: 'quick',
+    mobile: formattedMobile,
+    msg: message,
+    senderid: smsSenderId,
+    msgType: 'text',
+    format: 'text',
+  };
+
   try {
-    const response = await axios.get(fullUrl, { timeout: 30000 });
-    
-    // Parse the SMS API response - format=text returns string like:
-    // "SimpleMessageSuccessResponse [status=success, statusCode=200, reason=success, ...]"
+    const response = await axios.get('https://smsnotify.one/SMSApi/send', { params, timeout: 30000 });
+
     const responseData = typeof response.data === 'string' ? response.data : String(response.data);
-    
-    // Check for success indicators
-    const isSuccess = responseData.includes('status=success') || 
-                      responseData.includes('statusCode=200') ||
-                      responseData.includes('reason=success');
-    
-    // Check for actual failure indicators
-    const isError = responseData.includes('status=failed') || 
+    console.log(`[SMS] Sent to ${formattedMobile} | purpose=${purpose} | API response: ${responseData}`);
+
+    // Check for failure indicators
+    const isError = responseData.includes('status=failed') ||
                     responseData.includes('status=error') ||
-                    responseData.includes('statusCode=4') ||  // 4xx errors
-                    responseData.includes('statusCode=5');    // 5xx errors
-    
-    if (isError && !isSuccess) {
+                    responseData.includes('statusCode=4') ||
+                    responseData.includes('statusCode=5');
+
+    if (isError) {
       throw new Error(`SMS API Error: ${responseData}`);
     }
-    
+
     return { success: true, data: response.data };
   } catch (error) {
+    console.error(`[SMS] Failed for ${formattedMobile}:`, error.message);
     throw error;
   }
 }
@@ -76,3 +81,4 @@ async function sendOtpEmail(email, otp) {
 }
 
 module.exports = { generateOTP, sendOtpEmail, sendOtpSms };
+

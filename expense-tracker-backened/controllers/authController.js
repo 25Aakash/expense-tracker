@@ -35,7 +35,7 @@ exports.registerRequest = async (req, res) => {
       smsSent = true;
     }
   } catch (smsErr) {
-    // SMS sending failed
+    console.error('[Register] SMS sending failed:', smsErr.message);
   }
   
   // Provide feedback to the user
@@ -83,7 +83,7 @@ exports.resendOtp = async (req, res) => {
         smsSent = true;
       }
     } catch (smsErr) {
-      // SMS sending failed
+      console.error('[ResendOTP] SMS sending failed:', smsErr.message);
     }
     
     // Try to send OTP via Email
@@ -93,7 +93,7 @@ exports.resendOtp = async (req, res) => {
         emailSent = true;
       }
     } catch (emailErr) {
-      // Email sending failed
+      console.error('[ResendOTP] Email sending failed:', emailErr.message);
     }
     
     const channels = [];
@@ -270,7 +270,7 @@ exports.requestReset = async (req, res) => {
       await sendOtpEmail(identifier, otp);
       emailSent = true;
     } catch (err) {
-      // Email sending failed
+      console.error('[ResetPassword] Email sending failed:', err.message);
     }
   } else {
     // Send via SMS
@@ -278,7 +278,7 @@ exports.requestReset = async (req, res) => {
       await sendOtpSms(user.mobile, otp);
       smsSent = true;
     } catch (err) {
-      // SMS sending failed
+      console.error('[ResetPassword] SMS sending failed:', err.message);
     }
   }
   
