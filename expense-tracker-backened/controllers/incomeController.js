@@ -14,13 +14,15 @@ exports.addIncome = async (req, res, next) => {
 exports.getIncomes = async (req, res, next) => {
   try {
     const page  = parseInt(req.query.page  || '1');
-    const limit = parseInt(req.query.limit || '20');
+    const limit = parseInt(req.query.limit || '0'); // 0 = no limit (return all)
 
-    const incomes = await Income.find({ userId: req.user.id })
-      .sort({ date: -1 })
-      .skip((page - 1) * limit)
-      .limit(limit);
+    let query = Income.find({ userId: req.user.id }).sort({ date: -1 });
 
+    if (limit > 0) {
+      query = query.skip((page - 1) * limit).limit(limit);
+    }
+
+    const incomes = await query;
     res.json(incomes);
   } catch (err) {
     next(err);
